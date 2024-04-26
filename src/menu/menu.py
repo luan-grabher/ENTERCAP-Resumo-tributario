@@ -1,12 +1,15 @@
 from easygui import buttonbox, choicebox, msgbox
 
+from src.ecac.relacao_pgtos.ecac_relacao_pgtos import ecac_get_relacao_pgtos
+from src.menu.pre_run import pre_run
+
 MENU = {
     'teste': '🎮 Realizar um teste',
     'sair': '🚪 Sair do programa'
 }
 
 def main():
-
+    pre_run()    
     
     msg = 'Selecione uma opção:'
     title = 'Resumo Tributário Menu'
@@ -18,7 +21,7 @@ def main():
         
         
         if opcao_escolhida == MENU['teste']:
-            print('Teste escolhido')
+            ecac_get_relacao_pgtos()
         else:
             msgbox('Nenhuma opção selecionada')
                         
