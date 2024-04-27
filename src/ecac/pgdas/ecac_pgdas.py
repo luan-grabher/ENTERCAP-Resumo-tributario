@@ -9,12 +9,15 @@ from src.ecac.ecac import get_driver_ecac_logado
 
 
 def get_pgdas(driver, anos: list):
-    filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
-    quantidade_arquivos_antes = get_quantidade_downloads(filtro_arquivo_download_regex)
-    
     url = 'https://sinac.cav.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgdasd2018.app/Consulta'        
-    
     driver.get(url)
+
+    filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
+    baixar_pgdas(driver, anos, filtro_arquivo_download_regex)
+
+def baixar_pgdas(driver, anos: list, filtro_arquivo_download_regex: str):
+    
+    quantidade_arquivos_antes = get_quantidade_downloads(filtro_arquivo_download_regex)
     
     selector_input_ano = 'form input#ano'
     selector_button_submit = 'form button[type=submit]'
@@ -49,7 +52,16 @@ def get_pgdas(driver, anos: list):
         
             time.sleep(1)
     
-    return
+    return True
+
+def get_dados_dos_arquivos_downloads(filtro_arquivo_download_regex):
+    user_download_path = os.path.expanduser('~') + '\\Downloads'
+    downloads = os.listdir(user_download_path)
+    dados = []
+    for download in downloads:
+        if re.match(filtro_arquivo_download_regex, download):
+            dados.append(download)
+    return dados
 
 def get_quantidade_downloads(filtro_arquivo_download_regex):
     user_download_path = os.path.expanduser('~') + '\\Downloads'
@@ -63,5 +75,8 @@ def get_quantidade_downloads(filtro_arquivo_download_regex):
 if __name__ == '__main__':
     driver = get_driver_ecac_logado()
     get_pgdas(driver=driver, anos=[2019, 2020, 2021, 2022, 2023])
+    driver.close()
+    
+    print('Fim do programa')
     
     exit(0)
