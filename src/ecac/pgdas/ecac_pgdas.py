@@ -4,18 +4,31 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import os
 import time
+from pdfquery import PDFQuery
 
 from src.ecac.ecac import get_driver_ecac_logado
 
 
+filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
+
 def get_pgdas(driver, anos: list):
     url = 'https://sinac.cav.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgdasd2018.app/Consulta'        
     driver.get(url)
+    
+    baixar_pgdas(driver, anos)
+    
+    return get_dados_dos_arquivos_downloads()
 
-    filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
-    baixar_pgdas(driver, anos, filtro_arquivo_download_regex)
+def get_quantidade_downloads():
+    user_download_path = os.path.expanduser('~') + '\\Downloads'
+    downloads = os.listdir(user_download_path)
+    quantidade_arquivos = 0
+    for download in downloads:
+        if re.match(filtro_arquivo_download_regex, download):
+            quantidade_arquivos += 1
+    return quantidade_arquivos
 
-def baixar_pgdas(driver, anos: list, filtro_arquivo_download_regex: str):
+def baixar_pgdas(driver, anos: list):
     
     quantidade_arquivos_antes = get_quantidade_downloads(filtro_arquivo_download_regex)
     
@@ -54,28 +67,36 @@ def baixar_pgdas(driver, anos: list, filtro_arquivo_download_regex: str):
     
     return True
 
-def get_dados_dos_arquivos_downloads(filtro_arquivo_download_regex):
+def get_dados_dos_arquivos_downloads():
     user_download_path = os.path.expanduser('~') + '\\Downloads'
     downloads = os.listdir(user_download_path)
-    dados = []
+    dados = {}
     for download in downloads:
         if re.match(filtro_arquivo_download_regex, download):
-            dados.append(download)
+            pdf = PDFQuery(user_download_path + '\\' + download)
+            pdf.load()
+            
+            text_elements = pdf.pq('LTTextLineHorizontal')
+            text = [t.text for t in text_elements]
+
+            dados[download] = text
+            
     return dados
 
-def get_quantidade_downloads(filtro_arquivo_download_regex):
+def limpar_downloads_pgdas():
     user_download_path = os.path.expanduser('~') + '\\Downloads'
     downloads = os.listdir(user_download_path)
-    quantidade_arquivos = 0
     for download in downloads:
         if re.match(filtro_arquivo_download_regex, download):
-            quantidade_arquivos += 1
-    return quantidade_arquivos
+            os.remove(user_download_path + '\\' + download)
+    return True
 
 if __name__ == '__main__':
     driver = get_driver_ecac_logado()
     get_pgdas(driver=driver, anos=[2019, 2020, 2021, 2022, 2023])
     driver.close()
+    
+    #dados = get_dados_dos_arquivos_downloads()
     
     print('Fim do programa')
     
