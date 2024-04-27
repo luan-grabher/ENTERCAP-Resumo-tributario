@@ -1,5 +1,6 @@
 from easygui import buttonbox, choicebox, msgbox
 
+from src.ecac.ecac import get_driver_ecac_logado
 from src.ecac.relacao_pgtos.ecac_relacao_pgtos import ecac_get_relacao_pgtos
 from src.menu.pre_run import pre_run
 
@@ -21,7 +22,8 @@ def main():
         
         
         if opcao_escolhida == MENU['teste']:
-            ecac_get_relacao_pgtos()
+            driver = get_driver_ecac_logado()
+            ecac_get_relacao_pgtos(driver=driver, data_inicial='01/03/2019', data_final='31/03/2023')
         else:
             msgbox('Nenhuma opção selecionada')
                         
