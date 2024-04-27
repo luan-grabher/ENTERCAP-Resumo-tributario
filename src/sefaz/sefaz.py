@@ -11,7 +11,7 @@ def get_driver_sefaz_logado(driver=None):
     if not login(driver):
         return False
     
-    acessar_painel_usuario(driver)
+    #acessar_painel_usuario(driver)
     
     return driver
 
