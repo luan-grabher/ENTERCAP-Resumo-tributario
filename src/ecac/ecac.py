@@ -4,11 +4,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from easygui import msgbox
 import undetected_chromedriver as uc
 
-def get_driver_ecac_logado():
+def get_driver_ecac_logado(driver=None):
     try:
         url = 'https://cav.receita.fazenda.gov.br/autenticacao/login'        
         
-        driver = uc.Chrome()
+        if not driver:
+            driver = uc.Chrome()
 
         driver.get(url)
 
