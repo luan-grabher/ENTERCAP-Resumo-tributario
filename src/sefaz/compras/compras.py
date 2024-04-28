@@ -4,6 +4,8 @@ from src.sefaz.sefaz import get_driver_sefaz_logado
 
 def get_compras_sefaz(driver, cnpj, anos: list):
     compras = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['recebimento'])
+    
+    return compras
 
 if __name__ == '__main__':
     driver = get_driver_sefaz_logado()
