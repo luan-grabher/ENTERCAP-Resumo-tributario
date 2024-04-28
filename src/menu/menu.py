@@ -1,8 +1,8 @@
 from easygui import buttonbox, choicebox, msgbox
 
-from src.ecac.ecac import get_driver_ecac_logado
-from src.ecac.relacao_pgtos.ecac_relacao_pgtos import ecac_get_relacao_pgtos
 from src.menu.pre_run import pre_run
+from src.sefaz.faturamento.faturamento import get_faturamento_sefaz
+from src.sefaz.sefaz import get_driver_sefaz_logado
 
 MENU = {
     'teste': '🎮 Realizar um teste',
@@ -22,8 +22,13 @@ def main():
         
         
         if opcao_escolhida == MENU['teste']:
-            driver = get_driver_ecac_logado()
-            ecac_get_relacao_pgtos(driver=driver, data_inicial='01/03/2019', data_final='31/03/2023')
+            driver = get_driver_sefaz_logado()
+            if driver:
+                cnpj = '46.540.315/0003-94'        
+                anos = [2019, 2020, 2021, 2022, 2023]
+                faturamento = get_faturamento_sefaz(driver, cnpj, anos)
+                
+                driver.close()
         else:
             msgbox('Nenhuma opção selecionada')
                         
