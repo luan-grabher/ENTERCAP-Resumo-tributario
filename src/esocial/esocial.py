@@ -10,6 +10,8 @@ def get_driver_esocial_logado(driver=None):
         
     if not login(driver):
         return False
+    
+    print('Logado com sucesso no eSocial')
         
     return driver
     
