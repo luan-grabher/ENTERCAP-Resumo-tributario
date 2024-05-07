@@ -1,4 +1,3 @@
-import xlsxwriter
 import openpyxl
 
 def get_number_for_letter(letter):
@@ -8,25 +7,23 @@ def get_number_for_letter(letter):
 class Planilha:
     def __init__(self, arquivo):
         self.arquivo = arquivo
-        self.workbook = xlsxwriter.Workbook(self.arquivo)
+        self.workbook = openpyxl.load_workbook(arquivo)
 
         
     def set_CNPJ(self, cnpj):
-        aba = self.workbook.get_worksheet_by_name('Apresentação')
-        if aba is None:
-            return False
+        self.workbook['Apresentação']['C7'] = 'CNPJ: ' + cnpj
         
-        aba.write('D7', 'CNPJ: ' + cnpj)
+    def set_EMPRESA(self, empresa):
+        self.workbook['Apresentação']['B7'] = 'EMPRESA: ' + empresa
         
-    def save(self):
-        self.workbook.close()
+    def save(self, output_path = 'output.xlsx'):
+        self.workbook.save(output_path)
 
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'
     
-    planilha = openpyxl.load_workbook(planilha_path)
-    
-    planilha['Apresentação']['D7'] = 'CNPJ: 12345678901234'
-    planilha['Apresentação']['B7'] = 'EMPRESA: Teste'
+    planilha = Planilha(planilha_path)
+    planilha.set_CNPJ('123456789')
+    planilha.set_EMPRESA('Empresa ABC')
     
     planilha.save('output.xlsx')
