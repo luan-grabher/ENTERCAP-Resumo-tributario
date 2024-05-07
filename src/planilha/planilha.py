@@ -15,7 +15,7 @@ class Planilha:
         
     def set_EMPRESA(self, empresa):
         self.workbook['Apresentação']['B7'] = 'EMPRESA: ' + empresa
-        
+            
     def save(self, output_path = 'output.xlsx'):
         self.workbook.save(output_path)
 
