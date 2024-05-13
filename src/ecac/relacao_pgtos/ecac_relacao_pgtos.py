@@ -3,6 +3,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from easygui import msgbox
 import pandas as pd
+import io
 
 from src.ecac.ecac import get_driver_ecac_logado
 
@@ -32,7 +33,7 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
             (By.CSS_SELECTOR, selectorBotaoConsultar)))
         driver.find_element(By.CSS_SELECTOR, selectorBotaoConsultar).click()
         
-        
+        '''
         selectorChecboxTodos = "#CheckBoxTodos"
         WebDriverWait(driver, 10).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, selectorChecboxTodos)))
@@ -43,17 +44,42 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, selectorBtnImprimirRelacao)))
         driver.find_element(By.CSS_SELECTOR, selectorBtnImprimirRelacao).click()
+        '''
         
-        selectorTabelas = "form table"
+        selectorTabelas = "form table#listagemDARF"
         WebDriverWait(driver, 10).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, selectorTabelas)))
-        tabelas = driver.find_elements(By.CSS_SELECTOR, selectorTabelas)
+        tabelaElement = driver.find_element(By.CSS_SELECTOR, selectorTabelas)        
         
-        tabela3 = tabelas[3]
-        tabelaHtml = tabela3.get_attribute('outerHTML')
+        tabelaHtml = tabelaElement.get_attribute('outerHTML')
         
-        dicionario = pd.read_html(tabelaHtml)
-        return dicionario
+        dicionario = pd.read_html(io=io.StringIO(tabelaHtml))[0].to_dict(orient='records')
+        
+        relacao_pgtos = dict()
+        
+        for i, item in enumerate(dicionario):
+            codigo_receita = item['Código de Receita'] if 'Código de Receita' in item else None
+            if not codigo_receita:
+                continue
+            
+            if codigo_receita not in relacao_pgtos:
+                relacao_pgtos[codigo_receita] = dict()
+            
+            apuracao = dict()
+            apuracao['Tipo do Documento'] = item['Tipo do Documento'] if 'Tipo do Documento' in item else None
+            apuracao['Número do Documento'] = item['Número do Documento'] if 'Número do Documento' in item else None
+            apuracao['Período de Apuração'] = item['Período de Apuração'] if 'Período de Apuração' in item else None
+            apuracao['Data de Arrecadação'] = item['Data de Arrecadação'] if 'Data de Arrecadação' in item else None
+            apuracao['Data de Vencimento'] = item['Data de Vencimento'] if 'Data de Vencimento' in item else None
+            apuracao['Código de Receita'] = item['Código de Receita'] if 'Código de Receita' in item else None
+            
+            apuracao['Valor Total'] = item['Valor Total'] if 'Valor Total' in item else None
+            apuracao['Valor Total'] = apuracao['Valor Total'].replace('.', '').replace(',', '.')
+            apuracao['Valor Total'] = float(apuracao['Valor Total'])
+            
+            relacao_pgtos[codigo_receita][apuracao['Período de Apuração']] = apuracao
+        
+        return relacao_pgtos
 
     except:
         msgbox('Erro ao tentar acessar a aplicação de comprovante de arrecadação')
@@ -61,4 +87,7 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
 
 if __name__ == '__main__':
     driver = get_driver_ecac_logado()
-    ecac_get_relacao_pgtos(driver, data_inicial='01/03/2019', data_final='31/03/2023')
+    relacao_pgtos = ecac_get_relacao_pgtos(driver, data_inicial='01/03/2019', data_final='31/03/2023')
+    print(relacao_pgtos)
+
+    driver.quit()

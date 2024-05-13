@@ -5,8 +5,8 @@ LISTAGEM DE CODIGOS da arrecadação:
 https://siefreceitas.receita.economia.gov.br/codigos-de-receita-de-tributos-e-contribuicoes-darf-e-dje
 
 Com base na tabela extraida:
-- [ ] Colocar em alguma aba os código de receita para DE-PARA
-- [ ] Normalizar a tabela agrupando por codigo de receita
+- [x] Colocar em alguma aba os código de receita para DE-PARA
+- [x] Normalizar a tabela agrupando por codigo de receita
 - [ ] Inserir no array as denominações de receita com base no 'código de receita'. Pegar pela coluna 'denominação da receita'
 - [ ] Inserir na aba dados a relação de pagamentos, no nome utilizar o código + a denominação
 - [ ] Somar o valor total agrupado pelo codigo
