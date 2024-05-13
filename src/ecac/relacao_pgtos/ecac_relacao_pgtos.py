@@ -1,3 +1,4 @@
+import json
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,6 +11,15 @@ from src.ecac.ecac import get_driver_ecac_logado
 url_ecac = 'https://cav.receita.fazenda.gov.br/'
 driver = None
 
+def get_codigos_receita():
+    json_path = './src/ecac/relacao_pgtos/codigos_receita.json'
+    
+    codigos_receita = {}
+    
+    with open(json_path, encoding='utf-8') as json_file:
+        codigos_receita = json.load(json_file)
+        
+    return codigos_receita
 
 def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
 
@@ -33,19 +43,6 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
             (By.CSS_SELECTOR, selectorBotaoConsultar)))
         driver.find_element(By.CSS_SELECTOR, selectorBotaoConsultar).click()
         
-        '''
-        selectorChecboxTodos = "#CheckBoxTodos"
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, selectorChecboxTodos)))
-        driver.find_element(By.CSS_SELECTOR, selectorChecboxTodos).click()
-        
-        
-        selectorBtnImprimirRelacao = "#BtnImprimirRelacao"
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, selectorBtnImprimirRelacao)))
-        driver.find_element(By.CSS_SELECTOR, selectorBtnImprimirRelacao).click()
-        '''
-        
         selectorTabelas = "form table#listagemDARF"
         WebDriverWait(driver, 10).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, selectorTabelas)))
@@ -54,6 +51,8 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
         tabelaHtml = tabelaElement.get_attribute('outerHTML')
         
         dicionario = pd.read_html(io=io.StringIO(tabelaHtml))[0].to_dict(orient='records')
+        
+        codigos_receita = get_codigos_receita()
         
         relacao_pgtos = dict()
         
@@ -77,11 +76,16 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
             apuracao['Valor Total'] = apuracao['Valor Total'].replace('.', '').replace(',', '.')
             apuracao['Valor Total'] = float(apuracao['Valor Total'])
             
+            denominacao_da_receita = codigos_receita[str(codigo_receita)] if str(codigo_receita) in codigos_receita else None
+            apuracao['Denominação da Receita'] = denominacao_da_receita
+            apuracao['Descrição'] = str(codigo_receita) + ' - ' + str(denominacao_da_receita) if denominacao_da_receita else str(codigo_receita)
+            
             relacao_pgtos[codigo_receita][apuracao['Período de Apuração']] = apuracao
         
         return relacao_pgtos
 
-    except:
+    except Exception as e:
+        print(e)
         msgbox('Erro ao tentar acessar a aplicação de comprovante de arrecadação')
         return False
 
@@ -91,3 +95,4 @@ if __name__ == '__main__':
     print(relacao_pgtos)
 
     driver.quit()
+    exit()
