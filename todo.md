@@ -7,9 +7,9 @@ https://siefreceitas.receita.economia.gov.br/codigos-de-receita-de-tributos-e-co
 Com base na tabela extraida:
 - [x] Colocar em alguma aba os código de receita para DE-PARA
 - [x] Normalizar a tabela agrupando por codigo de receita
-- [ ] Inserir no array as denominações de receita com base no 'código de receita'. Pegar pela coluna 'denominação da receita'
+- [x] Inserir no array as denominações de receita com base no 'código de receita'. Pegar pela coluna 'denominação da receita'
+- [x] Somar o valor total agrupado pelo codigo
 - [ ] Inserir na aba dados a relação de pagamentos, no nome utilizar o código + a denominação
-- [ ] Somar o valor total agrupado pelo codigo
 - [ ] Na aba 'apresentação' colocar os valores somados por código abaixo de 'compras, vendas e 'folha' e deixar uma linha em branco
 - [ ] Em qtd colocar a quantidade de meses que tem valor
 

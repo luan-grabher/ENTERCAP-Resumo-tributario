@@ -55,6 +55,7 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
         codigos_receita = get_codigos_receita()
         
         relacao_pgtos = dict()
+        total_pgtos = 0
         
         for i, item in enumerate(dicionario):
             codigo_receita = item['Código de Receita'] if 'Código de Receita' in item else None
@@ -75,6 +76,7 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
             apuracao['Valor Total'] = item['Valor Total'] if 'Valor Total' in item else None
             apuracao['Valor Total'] = apuracao['Valor Total'].replace('.', '').replace(',', '.')
             apuracao['Valor Total'] = float(apuracao['Valor Total'])
+            total_pgtos+= apuracao['Valor Total']
             
             denominacao_da_receita = codigos_receita[str(codigo_receita)] if str(codigo_receita) in codigos_receita else None
             apuracao['Denominação da Receita'] = denominacao_da_receita
@@ -82,12 +84,12 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
             
             relacao_pgtos[codigo_receita][apuracao['Período de Apuração']] = apuracao
         
-        return relacao_pgtos
+        return relacao_pgtos, total_pgtos
 
     except Exception as e:
         print(e)
         msgbox('Erro ao tentar acessar a aplicação de comprovante de arrecadação')
-        return False
+        return False, False
 
 if __name__ == '__main__':
     driver = get_driver_ecac_logado()
