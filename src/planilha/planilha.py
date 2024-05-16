@@ -33,6 +33,10 @@ class Planilha:
                 
                 messtr = mesesstr[mes - 1]
                 aba_dados.cell(row=1, column=coluna, value=f'{messtr}/{ano}')
+                
+        coluna_total = coluna + 1
+        aba_dados.insert_cols(coluna_total)
+        aba_dados.cell(row=1, column=coluna_total, value='Total')
         
         self.ajustar_width_colunas_aba('Dados')
                 
@@ -67,6 +71,12 @@ class Planilha:
             
             for coluna in range(2, ultima_coluna + 1):
                 header = aba_dados.cell(row=1, column=coluna).value
+                is_coluna_total = header == 'Total'
+                if is_coluna_total:
+                    formula_sum = f'=SUM({openpyxl.utils.get_column_letter(2)}{linha}:{openpyxl.utils.get_column_letter(ultima_coluna - 1)}{linha})'
+                    aba_dados.cell(row=linha, column=coluna, value=formula_sum)
+                    break
+                
                 mes, ano = header.split('/')
                 mes = mesesInt[mes]
                     
