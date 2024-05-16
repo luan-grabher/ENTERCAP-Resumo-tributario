@@ -86,64 +86,107 @@ class Planilha:
             
             if is_insert_dados_aba_apresentacao:
                 self.inserir_linha_dados_na_apresentacao(linha)
-                               
-    def get_linha_tributos_sobre_vendas(self):
+    
+    def get_linha_com_descricao_aba_apresentacao(self, descricao: str):
         aba_apresentacao = self.workbook['Apresentação']
         
-        linha_TRIBUTOS_SOBRE_VENDAS = None
-        linha_verificacao = 12
+        linha_descricao = None
         ultima_linha = aba_apresentacao.max_row
         for linha in range(1, ultima_linha + 1):
-            valor_celula = aba_apresentacao.cell(row=linha, column=2).value
-            if valor_celula is None:
-                continue
-            
-            if 'TRIBUTOS SOBRE VENDAS' in aba_apresentacao.cell(row=linha, column=2).value:
-                linha_TRIBUTOS_SOBRE_VENDAS = linha
+            if descricao == aba_apresentacao.cell(row=linha, column=2).value:
+                linha_descricao = linha
                 break
         
-        return linha_TRIBUTOS_SOBRE_VENDAS
-
-    def inserir_linha_dados_na_apresentacao(self, linha: int):
+        return linha_descricao
+    
+    
+    def get_linha_com_descricao_aba_dados(self, descricao: str):
+        aba_dados = self.workbook['Dados']
+        
+        linha_descricao = None
+        ultima_linha = aba_dados.max_row
+        for linha in range(1, ultima_linha + 1):
+            if descricao == aba_dados.cell(row=linha, column=1).value:
+                linha_descricao = linha
+                break
+        
+        return linha_descricao
+    
+    def inserir_valor_na_linha_aba_apresentacao(self, linha: int, valor: str, quantidade: str):
+        aba_apresentacao = self.workbook['Apresentação']
+        
+        celula_faturamento = "$F$14"
+        formula_porcentagem_total_sobre_faturamento = f'=F{linha}/{celula_faturamento}'
+                
+        coluna_F = get_number_for_letter('F')
+        coluna_G = get_number_for_letter('G')
+        coluna_H = get_number_for_letter('H')        
+        
+        aba_apresentacao.cell(row=linha, column=coluna_F, value=valor).number_format = '#,##0.00'
+        aba_apresentacao.cell(row=linha, column=coluna_F).alignment = openpyxl.styles.Alignment(horizontal='center')
+        
+        aba_apresentacao.cell(row=linha, column=coluna_G, value=formula_porcentagem_total_sobre_faturamento).number_format = '0.00%'
+        aba_apresentacao.cell(row=linha, column=coluna_G).alignment = openpyxl.styles.Alignment(horizontal='center')
+        
+        aba_apresentacao.cell(row=linha, column=coluna_H, value=quantidade).number_format = '0'
+        aba_apresentacao.cell(row=linha, column=coluna_H).alignment = openpyxl.styles.Alignment(horizontal='center')
+    
+    def get_dado_by_linha(self, linha: int) -> dict:
         aba_dados = self.workbook['Dados']
         
         descricao = aba_dados.cell(row=linha, column=1).value
         formula_total = f'=Dados!{openpyxl.utils.get_column_letter(aba_dados.max_column)}{linha}'
         formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!B{linha}:{openpyxl.utils.get_column_letter(aba_dados.max_column - 1)}{linha}, "<>")'
+        
+        return {
+            'descricao': descricao,
+            'formula_total': formula_total,
+            'formula_quantidade_meses_com_valor': formula_quantidade_meses_com_valor
+        }
     
-        aba_apresentacao = self.workbook['Apresentação']
-        linha_TRIBUTOS_SOBRE_VENDAS = self.get_linha_tributos_sobre_vendas()
+    def inserir_linha_dados_na_apresentacao(self, linha: int):
+        dado = self.get_dado_by_linha(linha)
+        descricao = dado['descricao']
+        formula_total = dado['formula_total']
+        formula_quantidade_meses_com_valor = dado['formula_quantidade_meses_com_valor']
+            
+        linha_TRIBUTOS_SOBRE_VENDAS = self.get_linha_com_descricao_aba_apresentacao('% TRIBUTOS SOBRE VENDAS')
         
         #insere linha acima da linha de tributos sobre vendas
         if linha_TRIBUTOS_SOBRE_VENDAS is None:
             return
         
+        aba_apresentacao = self.workbook['Apresentação']
         aba_apresentacao.insert_rows(linha_TRIBUTOS_SOBRE_VENDAS)
         
-        celula_faturamento = "$F$14"
-        formula_porcentagem_total_sobre_faturamento = f'=F{linha_TRIBUTOS_SOBRE_VENDAS}/{celula_faturamento}'
-        
+        #borda espessa esquerda na "B" e borda espessa direita ta "H"
         coluna_B = get_number_for_letter('B')
-        coluna_F = get_number_for_letter('F')
-        coluna_G = get_number_for_letter('G')
         coluna_H = get_number_for_letter('H')
         
-        #borda espessa esquerda na "B" e borda espessa direita ta "H"
         aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_B).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
         aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_H).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
         
         aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_B, value=descricao)
         
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_F, value=formula_total).number_format = '#,##0.00'
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_F).alignment = openpyxl.styles.Alignment(horizontal='center')
-        
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_G, value=formula_porcentagem_total_sobre_faturamento).number_format = '0.00%'
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_G).alignment = openpyxl.styles.Alignment(horizontal='center')
-        
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_H, value=formula_quantidade_meses_com_valor)
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_H).alignment = openpyxl.styles.Alignment(horizontal='center')
-        
+        self.inserir_valor_na_linha_aba_apresentacao(linha_TRIBUTOS_SOBRE_VENDAS, formula_total, formula_quantidade_meses_com_valor)
             
+            
+    def inserir_valor_dado_na_apresentacao_pela_descricao(self, descricao_apresentacao, descricao_dados):
+        linha_dados = self.get_linha_com_descricao_aba_dados(descricao_dados)
+        if linha_dados is None:
+            return
+        
+        linha_apresentacao = self.get_linha_com_descricao_aba_apresentacao(descricao_apresentacao)
+        if linha_apresentacao is None:
+            return
+        
+        dado = self.get_dado_by_linha(linha_dados)
+        formula_total = dado['formula_total']
+        formula_quantidade_meses_com_valor = dado['formula_quantidade_meses_com_valor']
+        
+        self.inserir_valor_na_linha_aba_apresentacao(linha_apresentacao, formula_total, formula_quantidade_meses_com_valor)
+        
+        
                                       
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'

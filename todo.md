@@ -10,8 +10,8 @@ Com base na tabela extraida:
 - [x] Inserir no array as denominações de receita com base no 'código de receita'. Pegar pela coluna 'denominação da receita'
 - [x] Somar o valor total agrupado pelo codigo
 - [x] Inserir na aba dados a relação de pagamentos, no nome utilizar o código + a denominação
-- [ ] Na aba 'apresentação' colocar os valores somados por código abaixo de 'compras, vendas e 'folha' e deixar uma linha em branco
-- [ ] Em qtd colocar a quantidade de meses que tem valor
+- [x] Na aba 'apresentação' colocar os valores somados por código abaixo de 'compras, vendas e 'folha' e deixar uma linha em branco
+- [x] Em qtd colocar a quantidade de meses que tem valor
 
 
 # ECAC PGDAS
@@ -42,8 +42,8 @@ Com base na tabela extraida:
 # ESOCIAL contribuicao folha
 
 ### Para cada mês:
- - [ ] Extrair 'Base de Calculo' como 'Folha' na aba 'dados'
- - [ ] Extrair 'Valor Contribuição' como 'INSS - Esocial' na aba 'dados'
- - [ ] Na aba 'apresentação' colocar o total somado como 'Folha'
- - [ ] Em qtd colocar a quantidade de meses que tem valor
- - [ ] Na aba 'apresentação' colocar o total somado como 'INSS - Esocial' junto com os outros impostos
+ - [x] Extrair 'Base de Calculo' como 'Folha' na aba 'dados'
+ - [x] Extrair 'Valor Contribuição' como 'INSS - Esocial' na aba 'dados'
+ - [x] Na aba 'apresentação' colocar o total somado como 'Folha'
+ - [x] Em qtd colocar a quantidade de meses que tem valor
+ - [x] Na aba 'apresentação' colocar o total somado como 'INSS - Esocial' junto com os outros impostos
