@@ -162,7 +162,7 @@ if __name__ == '__main__':
     
         planilha = Planilha(planilha_path)
         planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2021)
-        planilha.insert_dados_aba_dados(lista_planilha)
+        planilha.insert_dados_aba_dados(lista_planilha, True)
         
         planilha.save('output.xlsx')
         

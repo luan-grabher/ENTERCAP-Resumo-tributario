@@ -56,7 +56,7 @@ class Planilha:
             adjusted_width = (max_length + 2)
             aba.column_dimensions[column].width = adjusted_width
 
-    def insert_dados_aba_dados(self, lista_de_dados: list[dict[str, str | float]]):   
+    def insert_dados_aba_dados(self, lista_de_dados: list[dict[str, str | float]], is_insert_dados_aba_apresentacao: bool = False):  
         aba_dados = self.workbook['Dados']
         
         ultima_linha_preenchida = aba_dados.max_row
@@ -83,6 +83,9 @@ class Planilha:
                 mes_MM = str(mes).zfill(2)
                 valor_mes = dado[f'{ano}-{mes_MM}'] if f'{ano}-{mes_MM}' in dado else None
                 aba_dados.cell(row=linha, column=coluna, value=valor_mes)
+            
+            if is_insert_dados_aba_apresentacao:
+                self.inserir_linha_dados_na_apresentacao(linha)
                                
     def get_linha_tributos_sobre_vendas(self):
         aba_apresentacao = self.workbook['Apresentação']
