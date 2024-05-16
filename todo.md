@@ -9,7 +9,7 @@ Com base na tabela extraida:
 - [x] Normalizar a tabela agrupando por codigo de receita
 - [x] Inserir no array as denominações de receita com base no 'código de receita'. Pegar pela coluna 'denominação da receita'
 - [x] Somar o valor total agrupado pelo codigo
-- [ ] Inserir na aba dados a relação de pagamentos, no nome utilizar o código + a denominação
+- [x] Inserir na aba dados a relação de pagamentos, no nome utilizar o código + a denominação
 - [ ] Na aba 'apresentação' colocar os valores somados por código abaixo de 'compras, vendas e 'folha' e deixar uma linha em branco
 - [ ] Em qtd colocar a quantidade de meses que tem valor
 

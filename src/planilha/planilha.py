@@ -84,13 +84,84 @@ class Planilha:
                 valor_mes = dado[f'{ano}-{mes_MM}'] if f'{ano}-{mes_MM}' in dado else None
                 aba_dados.cell(row=linha, column=coluna, value=valor_mes)
                                
-                               
+    def get_linha_tributos_sobre_vendas(self):
+        aba_apresentacao = self.workbook['Apresentação']
+        
+        linha_TRIBUTOS_SOBRE_VENDAS = None
+        linha_verificacao = 12
+        ultima_linha = aba_apresentacao.max_row
+        for linha in range(1, ultima_linha + 1):
+            valor_celula = aba_apresentacao.cell(row=linha, column=2).value
+            if valor_celula is None:
+                continue
+            
+            if 'TRIBUTOS SOBRE VENDAS' in aba_apresentacao.cell(row=linha, column=2).value:
+                linha_TRIBUTOS_SOBRE_VENDAS = linha
+                break
+        
+        return linha_TRIBUTOS_SOBRE_VENDAS
+
+    def inserir_linha_dados_na_apresentacao(self, linha: int):
+        aba_dados = self.workbook['Dados']
+        
+        descricao = aba_dados.cell(row=linha, column=1).value
+        formula_total = f'=Dados!{openpyxl.utils.get_column_letter(aba_dados.max_column)}{linha}'
+        formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!B{linha}:{openpyxl.utils.get_column_letter(aba_dados.max_column - 1)}{linha}, "<>")'
+    
+        aba_apresentacao = self.workbook['Apresentação']
+        linha_TRIBUTOS_SOBRE_VENDAS = self.get_linha_tributos_sobre_vendas()
+        
+        #insere linha acima da linha de tributos sobre vendas
+        if linha_TRIBUTOS_SOBRE_VENDAS is None:
+            return
+        
+        aba_apresentacao.insert_rows(linha_TRIBUTOS_SOBRE_VENDAS)
+        
+        celula_faturamento = "$F$14"
+        formula_porcentagem_total_sobre_faturamento = f'=F{linha_TRIBUTOS_SOBRE_VENDAS}/{celula_faturamento}'
+        
+        coluna_B = get_number_for_letter('B')
+        coluna_F = get_number_for_letter('F')
+        coluna_G = get_number_for_letter('G')
+        coluna_H = get_number_for_letter('H')
+        
+        #borda espessa esquerda na "B" e borda espessa direita ta "H"
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_B).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_H).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
+        
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_B, value=descricao)
+        
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_F, value=formula_total).number_format = '#,##0.00'
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_F).alignment = openpyxl.styles.Alignment(horizontal='center')
+        
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_G, value=formula_porcentagem_total_sobre_faturamento).number_format = '0.00%'
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_G).alignment = openpyxl.styles.Alignment(horizontal='center')
+        
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_H, value=formula_quantidade_meses_com_valor)
+        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_H).alignment = openpyxl.styles.Alignment(horizontal='center')
+        
+            
+                                      
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'
     
     planilha = Planilha(planilha_path)
+    
     planilha.set_CNPJ('123456789')
     planilha.set_EMPRESA('Empresa ABC')
     planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2021)
+    planilha.insert_dados_aba_dados([
+        {
+            'descricao': 'Receita',
+            '2019-01': 100,
+            '2019-02': 200,
+        },
+        {
+            'descricao': 'Despesa',
+            '2019-01': 50,
+            '2019-02': 100,
+        }
+    ])
+    planilha.inserir_linha_dados_na_apresentacao(2)
     
     planilha.save('output.xlsx')
