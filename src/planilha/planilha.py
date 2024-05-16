@@ -4,6 +4,8 @@ def get_number_for_letter(letter):
     normalized_letter = letter.upper()
     return ord(normalized_letter) - 64
 
+mesesstr = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+mesesInt = {mes: i + 1 for i, mes in enumerate(mesesstr)}
 class Planilha:
     def __init__(self, arquivo):
         self.arquivo = arquivo
@@ -22,9 +24,7 @@ class Planilha:
     def inserir_colunas_mes_aba_dados(self, mesInicio: int, anoInicio: int, mesFim: int, anoFim: int):
         aba_dados = self.workbook['Dados']
         
-        coluna_inicio = get_number_for_letter('B')
-        
-        mesesstr = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        coluna_inicio = get_number_for_letter('B')        
         
         for ano in range(anoInicio, anoFim + 1):
             for mes in range(mesInicio, mesFim + 1):
@@ -52,12 +52,35 @@ class Planilha:
             adjusted_width = (max_length + 2)
             aba.column_dimensions[column].width = adjusted_width
 
+    def insert_dados_aba_dados(self, lista_de_dados: list[dict[str, str | float]]):   
+        aba_dados = self.workbook['Dados']
+        
+        ultima_linha_preenchida = aba_dados.max_row
+        
+        linha = ultima_linha_preenchida
+        for dado in lista_de_dados:
+            linha += 1
+            
+            aba_dados.cell(row=linha, column=1, value=dado['descricao'])
+            
+            ultima_coluna = aba_dados.max_column
+            
+            for coluna in range(2, ultima_coluna + 1):
+                header = aba_dados.cell(row=1, column=coluna).value
+                mes, ano = header.split('/')
+                mes = mesesInt[mes]
+                    
+                mes_MM = str(mes).zfill(2)
+                valor_mes = dado[f'{ano}-{mes_MM}'] if f'{ano}-{mes_MM}' in dado else None
+                aba_dados.cell(row=linha, column=coluna, value=valor_mes)
+                               
+                               
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'
     
     planilha = Planilha(planilha_path)
     planilha.set_CNPJ('123456789')
     planilha.set_EMPRESA('Empresa ABC')
-    planilha.inserir_colunas_mes_aba_dados(1, 2021, 12, 2023)
+    planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2021)
     
     planilha.save('output.xlsx')

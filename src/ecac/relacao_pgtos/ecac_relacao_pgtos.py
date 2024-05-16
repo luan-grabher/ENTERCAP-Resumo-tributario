@@ -7,6 +7,7 @@ import pandas as pd
 import io
 
 from src.ecac.ecac import get_driver_ecac_logado
+from src.planilha.planilha import Planilha
 
 url_ecac = 'https://cav.receita.fazenda.gov.br/'
 driver = None
@@ -21,7 +22,14 @@ def get_codigos_receita():
         
     return codigos_receita
 
-def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
+def get_competencia(data: str) -> str:
+    data_split = data.split('/')
+    mes_MM = data_split[1].zfill(2)
+    ano = data_split[2]
+    
+    return f'{ano}-{mes_MM}'
+
+def ecac_get_relacao_pgtos(driver, data_inicial, data_final) -> list[dict[str, dict[str, str | float]]]:
 
     try:
         url_aplicacao = 'https://cav.receita.fazenda.gov.br/Servicos/ATFLA/PagtoWeb.app/Default.aspx'
@@ -89,12 +97,76 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final):
     except Exception as e:
         print(e)
         msgbox('Erro ao tentar acessar a aplicação de comprovante de arrecadação')
-        return False, False
+        return None, None
+
+def converter_relacao_pgtos_lista_planilha(relacao_pgtos: dict[str, dict[str, dict[str, str | float]]]) -> list[dict[str, str | float]]:
+    lista_planilha = []
+    
+    for codigo_receita in relacao_pgtos:
+        dado = dict()
+        
+        for periodo_apuracao in relacao_pgtos[codigo_receita]:
+            apuracao = relacao_pgtos[codigo_receita][periodo_apuracao]
+            
+            dado['descricao'] = apuracao['Descrição']
+            
+            competencia = get_competencia(apuracao['Período de Apuração'])
+            dado[f'{competencia}'] = apuracao['Valor Total']
+            
+        lista_planilha.append(dado)
+    
+    return lista_planilha
 
 if __name__ == '__main__':
-    driver = get_driver_ecac_logado()
-    relacao_pgtos = ecac_get_relacao_pgtos(driver, data_inicial='01/03/2019', data_final='31/03/2023')
-    print(relacao_pgtos)
+    tipo_teste = input('Tipo de teste:\n (1 - Teste ECAC)\n (2 - Teste Inserção na planilha)\n')
+    
+    if tipo_teste == '1':
+        driver = get_driver_ecac_logado()
+        relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(driver, data_inicial='01/03/2019', data_final='31/03/2023')
+        print(relacao_pgtos)
+        print(total_pgtos)
 
-    driver.quit()
+        driver.quit()
+    elif tipo_teste == '2':
+        relacao_pgtos = {
+            '0211': {
+                '01/03/2019': {
+                    'Tipo do Documento': 'DARF',
+                    'Número do Documento': '0211.2019.03.001',
+                    'Período de Apuração': '01/03/2019',
+                    'Data de Arrecadação': '15/03/2019',
+                    'Data de Vencimento': '16/03/2019',
+                    'Código de Receita': '0211',
+                    'Valor Total': 100.0,
+                    'Denominação da Receita': 'IRPF - Carnê-Leão',
+                    'Descrição': '0211 - IRPF - Carnê-Leão'
+                },
+                '01/04/2019': {
+                    'Tipo do Documento': 'DARF',
+                    'Número do Documento': '0211.2019.04.001',
+                    'Período de Apuração': '01/04/2019',
+                    'Data de Arrecadação': '15/04/2019',
+                    'Data de Vencimento': '16/04/2019',
+                    'Código de Receita': '0211',
+                    'Valor Total': 200.0,
+                    'Denominação da Receita': 'IRPF - Carnê-Leão',
+                    'Descrição': '0211 - IRPF - Carnê-Leão'
+                }
+            }
+        }
+        
+        lista_planilha = converter_relacao_pgtos_lista_planilha(relacao_pgtos)
+        print(lista_planilha)
+        
+        planilha_path = 'template.xlsx'
+    
+        planilha = Planilha(planilha_path)
+        planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2021)
+        planilha.insert_dados_aba_dados(lista_planilha)
+        
+        planilha.save('output.xlsx')
+        
+    else:
+        print('Opção inválida')
+        
     exit()
