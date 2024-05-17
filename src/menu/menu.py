@@ -1,11 +1,11 @@
 from easygui import buttonbox, choicebox, msgbox
 
+from src.gerar_resumo_tributario.gerar_resumo_tributario import gerar_resumo_tributario
+from src.menu.inputs_usuario import get_anos, get_cnpj
 from src.menu.pre_run import pre_run
-from src.sefaz.faturamento.faturamento import get_faturamento_sefaz
-from src.sefaz.sefaz import get_driver_sefaz_logado
 
 MENU = {
-    'teste': '🎮 Realizar um teste',
+    'gerar_resumo_tributario': '📄 Gerar Planilha Excel Resumo tributário',
     'sair': '🚪 Sair do programa'
 }
 
@@ -17,22 +17,28 @@ def main():
     
     is_sair_do_programa = False
     while not is_sair_do_programa:
-        opcoes_disponiveis_list = list(MENU.values())
-        opcao_escolhida = choicebox(msg, title, opcoes_disponiveis_list)
-        
-        
-        if opcao_escolhida == MENU['teste']:
-            driver = get_driver_sefaz_logado()
-            if driver:
-                cnpj = '46.540.315/0003-94'        
-                anos = [2019, 2020, 2021, 2022, 2023]
-                faturamento = get_faturamento_sefaz(driver, cnpj, anos)
+        try:
+            opcoes_disponiveis_list = list(MENU.values())
+            opcao_escolhida = choicebox(msg, title, opcoes_disponiveis_list)
+            
+            
+            if opcao_escolhida == MENU['gerar_resumo_tributario']:
+                cnpj = get_cnpj()
+                anos = get_anos()
+                                
+                gerar_resumo_tributario(cnpj, anos)
                 
-                driver.close()
-        else:
-            msgbox('Nenhuma opção selecionada')
-                        
-        is_sair_do_programa = buttonbox('Deseja realizar outra operação?', 'Sair do programa', ['Sim', 'Não']) == 'Não'
+            elif opcao_escolhida == MENU['sair']:
+                break
+            else:
+                msgbox('Nenhuma opção selecionada')
+                            
+            is_sair_do_programa = buttonbox('Deseja realizar outra operação?', 'Sair do programa', ['Sim', 'Não']) == 'Não'
+            if is_sair_do_programa:
+                break
+        except Exception as e:
+            msgbox(f'Erro: {e}')
+            break
 
 
 if __name__ == '__main__':

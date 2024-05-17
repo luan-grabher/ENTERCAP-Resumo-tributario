@@ -31,7 +31,8 @@ Com base na tabela extraida:
 	- [x] Na aba 'apresentação' colocar o total somado como 'Receita com ST' e 'Receita sem ST'
 	- [x] Em qtd colocar a quantidade de meses que tem valor
 
-	- [ ] Verificar com Regis o que fazer quando existem várias empresas
+	- [x] Verificar com Regis o que fazer quando existem várias empresas
+	- [ ] Somar todas receitas com ST e sem ST quando houver mais de uma empresa
 
 
 - Caixa "Total geral empresa"
