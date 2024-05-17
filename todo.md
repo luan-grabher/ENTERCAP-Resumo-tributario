@@ -25,11 +25,13 @@ Com base na tabela extraida:
   - "Receita Bruta informada"
   	
 	Com base no texto entre o titulo e 'receita bruta informada' é possivel validar se é com ou sem substituição tributária
-	- [ ] Extrair receita com substituição tributária
-	- [ ] Extrair receita sem substituição tributária
+	- [x] Extrair receita com substituição tributária
+	- [x] Extrair receita sem substituição tributária
 	- [ ] Na planilha colocar por mês na aba 'dados' os valores
 	- [ ] Na aba 'apresentação' colocar o total somado como 'Receita com ST' e 'Receita sem ST'
 	- [ ] Em qtd colocar a quantidade de meses que tem valor
+
+	- [ ] Verificar com Regis o que fazer quando existem várias empresas
 
 
 - Caixa "Total geral empresa"

@@ -4,9 +4,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import os
 import time
-from pdfquery import PDFQuery
 
 from src.ecac.ecac import get_driver_ecac_logado
+from src.ecac.pgdas.pgdas_pdf import get_dados_pdf
 
 
 filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
@@ -80,17 +80,13 @@ def get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False):
     downloads = os.listdir(user_download_path)
     dados = {}
     for download in downloads:
-        if re.match(filtro_arquivo_download_regex, download):
-            pdf = PDFQuery(user_download_path + '\\' + download)
-            pdf.load()
-            
-            text_elements = pdf.pq('LTTextLineHorizontal')
-            text = [t.text for t in text_elements]
-
-            dados[download] = text
-            if is_salvar_em_arquivo_de_texto:
-                with open(user_download_path + '\\' + download + '.txt', 'w') as f:
-                    f.write('\n'.join(text))
+        if re.match(filtro_arquivo_download_regex, download) and download.endswith('.pdf'):
+            pdf_path = user_download_path + '\\' + download
+            try:
+                dados[download] = get_dados_pdf(pdf_path, is_salvar_em_arquivo_de_texto=is_salvar_em_arquivo_de_texto)                
+            except Exception as e:
+                print('Erro ao tentar extrair dados do arquivo ' + pdf_path)
+                print(e)
             
     return dados
 
@@ -103,7 +99,7 @@ def limpar_downloads_pgdas():
     return True
 
 if __name__ == '__main__':
-    tipo_teste = input('Tipo de teste (1 - Teste de download, 2 - Teste de extração de dados): ')
+    tipo_teste = input('Tipo de teste:\n1 - Teste de download\n2 - Teste de extração de dados:\n')
     
     if tipo_teste == '1':    
         driver = get_driver_ecac_logado()
@@ -114,7 +110,7 @@ if __name__ == '__main__':
         driver.close()
         
     else:
-        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=True)
+        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False)
     
     print('Fim do programa')
     
