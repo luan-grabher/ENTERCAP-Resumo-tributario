@@ -35,6 +35,17 @@ def get_receitas(text: str) -> tuple:
         
     return receita_sem_st, receita_com_st
 
+def get_valor_das(text: str) -> float:
+    texto_totais = re.findall(r"Totais do Estabelecimento[\d\D\n]*?Total Geral da Empresa[\d\D\n]*?Total do Débito Exigível", text)
+    
+    totais = re.findall(r"Total\n(\d{1,3}\.?\d{1,3},\d{2})", texto_totais[0]) if texto_totais else []
+    
+    ultimo_total = totais[-1] if totais else None
+    if not ultimo_total:
+        return 0
+    
+    return float(ultimo_total.replace('.', '').replace(',', '.'))
+
 def get_dados_pdf(pdf_path: str, is_salvar_em_arquivo_de_texto: bool = False) -> dict:
     if not pdf_path.endswith('.pdf'):
         raise Exception('O arquivo precisa ser um arquivo PDF')
@@ -42,11 +53,7 @@ def get_dados_pdf(pdf_path: str, is_salvar_em_arquivo_de_texto: bool = False) ->
     pdf = PDFQuery(pdf_path)
     pdf.load()
     
-    full_text = pdf.pq('LTPage').text()
-    
-    #text_elements = pdf.pq('LTTextLineHorizontal')
-    #text = [t.text for t in text_elements].join('\n')
-    text = full_text
+    text = pdf.pq('LTPage').text()
     
     if is_salvar_em_arquivo_de_texto:
         with open(pdf_path + '.txt', 'w') as f:
@@ -55,12 +62,14 @@ def get_dados_pdf(pdf_path: str, is_salvar_em_arquivo_de_texto: bool = False) ->
     periodo_apuracao = get_periodo_apuracao(text)
     numero_declaracao = get_numero_declaracao(text)
     receita_sem_st, receita_com_st = get_receitas(text)
+    das = get_valor_das(text)
 
     dados = {
         'periodo_apuracao': periodo_apuracao,
         'numero_declaracao': numero_declaracao,
         'receita_sem_st': receita_sem_st,
-        'receita_com_st': receita_com_st
+        'receita_com_st': receita_com_st,
+        'das': das
     }
     print(dados)
     

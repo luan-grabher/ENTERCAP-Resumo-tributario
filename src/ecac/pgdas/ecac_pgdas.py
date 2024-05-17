@@ -110,7 +110,7 @@ if __name__ == '__main__':
         driver.close()
         
     else:
-        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False)
+        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=True)
     
     print('Fim do programa')
     

@@ -35,7 +35,7 @@ Com base na tabela extraida:
 
 
 - Caixa "Total geral empresa"
-	- [ ] Extrair 'Total debito Exigivel -> total (bem no canto direito ao lado dos impostos)'
+	- [x] Extrair 'Total debito Exigivel -> total (bem no canto direito ao lado dos impostos)'
 	- [ ] Na planilha colocar como 'DAS' por mês na aba 'dados' os valores de cada mês
 	- [ ] Na aba 'apresentação' colocar o total somado como 'Simples Nacional' se houver valor em pelo menos 1 mês
 	- [ ] Em qtd colocar a quantidade de meses que tem valor
