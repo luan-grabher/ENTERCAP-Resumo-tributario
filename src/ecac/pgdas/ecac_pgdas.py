@@ -4,6 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import os
 import time
+from tqdm import tqdm
 
 from src.ecac.ecac import get_driver_ecac_logado
 from src.ecac.pgdas.pgdas_pdf import get_dados_pdf
@@ -79,7 +80,7 @@ def get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False):
     user_download_path = os.path.expanduser('~') + '\\Downloads'
     downloads = os.listdir(user_download_path)
     dados = {}
-    for download in downloads:
+    for download in tqdm(downloads, desc='Extraindo dados dos arquivos PDF'):
         if re.match(filtro_arquivo_download_regex, download) and download.endswith('.pdf'):
             pdf_path = user_download_path + '\\' + download
             try:
@@ -87,8 +88,20 @@ def get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False):
             except Exception as e:
                 print('Erro ao tentar extrair dados do arquivo ' + pdf_path)
                 print(e)
-            
-    return dados
+                
+    dados_sem_duplicados = {}
+    for nome_arquivo, dado in dados.items():
+        if dado['periodo_apuracao'] not in dados_sem_duplicados:
+            dados_sem_duplicados[dado['periodo_apuracao']] = dado
+            continue
+        
+        if dado['periodo_apuracao'] in dados_sem_duplicados:
+            is_mais_recente = dado['numero_declaracao'] > dados_sem_duplicados[dado['periodo_apuracao']]['numero_declaracao']
+            if is_mais_recente:
+                print('Dado mais recente encontrado para o período de apuração ' + dado['periodo_apuracao'])
+                dados_sem_duplicados[dado['periodo_apuracao']] = dado
+    
+    return dados_sem_duplicados
 
 def limpar_downloads_pgdas():
     user_download_path = os.path.expanduser('~') + '\\Downloads'
@@ -110,7 +123,7 @@ if __name__ == '__main__':
         driver.close()
         
     else:
-        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=True)
+        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False)
     
     print('Fim do programa')
     

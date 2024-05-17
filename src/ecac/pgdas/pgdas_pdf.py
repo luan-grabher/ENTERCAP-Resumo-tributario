@@ -71,6 +71,5 @@ def get_dados_pdf(pdf_path: str, is_salvar_em_arquivo_de_texto: bool = False) ->
         'receita_com_st': receita_com_st,
         'das': das
     }
-    print(dados)
     
     return dados
