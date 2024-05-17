@@ -57,6 +57,22 @@ class Planilha:
             aba.column_dimensions[column].width = adjusted_width
 
     def insert_dados_aba_dados(self, lista_de_dados: list[dict[str, str | float]], is_insert_dados_aba_apresentacao: bool = False):  
+        '''
+            lista_de_dados: lista de dicionários onde cada dicionário representa um dado a ser inserido na planilha. Exemplo:
+                [
+                    {
+                        'descricao': 'Receita',
+                        '2019-01': 100,
+                        '2019-02': 200
+                    },
+                    {
+                        'descricao': 'Despesa',
+                        '2019-01': 50,
+                        '2019-02': 100
+                    }
+                ]
+        '''
+        
         aba_dados = self.workbook['Dados']
         
         ultima_linha_preenchida = aba_dados.max_row

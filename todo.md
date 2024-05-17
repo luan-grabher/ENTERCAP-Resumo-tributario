@@ -27,18 +27,18 @@ Com base na tabela extraida:
 	Com base no texto entre o titulo e 'receita bruta informada' é possivel validar se é com ou sem substituição tributária
 	- [x] Extrair receita com substituição tributária
 	- [x] Extrair receita sem substituição tributária
-	- [ ] Na planilha colocar por mês na aba 'dados' os valores
-	- [ ] Na aba 'apresentação' colocar o total somado como 'Receita com ST' e 'Receita sem ST'
-	- [ ] Em qtd colocar a quantidade de meses que tem valor
+	- [x] Na planilha colocar por mês na aba 'dados' os valores
+	- [x] Na aba 'apresentação' colocar o total somado como 'Receita com ST' e 'Receita sem ST'
+	- [x] Em qtd colocar a quantidade de meses que tem valor
 
 	- [ ] Verificar com Regis o que fazer quando existem várias empresas
 
 
 - Caixa "Total geral empresa"
 	- [x] Extrair 'Total debito Exigivel -> total (bem no canto direito ao lado dos impostos)'
-	- [ ] Na planilha colocar como 'DAS' por mês na aba 'dados' os valores de cada mês
-	- [ ] Na aba 'apresentação' colocar o total somado como 'Simples Nacional' se houver valor em pelo menos 1 mês
-	- [ ] Em qtd colocar a quantidade de meses que tem valor
+	- [x] Na planilha colocar como 'DAS' por mês na aba 'dados' os valores de cada mês
+	- [x] Na aba 'apresentação' colocar o total somado como 'Simples Nacional' se houver valor em pelo menos 1 mês
+	- [x] Em qtd colocar a quantidade de meses que tem valor
 
 
 # ESOCIAL contribuicao folha

@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from src.ecac.ecac import get_driver_ecac_logado
 from src.ecac.pgdas.pgdas_pdf import get_dados_pdf
+from src.planilha.planilha import Planilha
 
 
 filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
@@ -89,19 +90,48 @@ def get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False):
                 print('Erro ao tentar extrair dados do arquivo ' + pdf_path)
                 print(e)
                 
-    dados_sem_duplicados = {}
-    for nome_arquivo, dado in dados.items():
-        if dado['periodo_apuracao'] not in dados_sem_duplicados:
-            dados_sem_duplicados[dado['periodo_apuracao']] = dado
-            continue
-        
-        if dado['periodo_apuracao'] in dados_sem_duplicados:
-            is_mais_recente = dado['numero_declaracao'] > dados_sem_duplicados[dado['periodo_apuracao']]['numero_declaracao']
-            if is_mais_recente:
-                print('Dado mais recente encontrado para o período de apuração ' + dado['periodo_apuracao'])
-                dados_sem_duplicados[dado['periodo_apuracao']] = dado
+    receitas_sem_st = {
+        'descricao': 'Receita sem ST',
+    }
+    receitas_com_st = {
+        'descricao': 'Receita com ST',
+    }
+    das = {
+        'descricao': 'Simples Nacional',
+    }
     
-    return dados_sem_duplicados
+    def insert_dado_para_planilha():
+        receitas_sem_st[competencia] = dado['receita_sem_st']
+        receitas_com_st[competencia] = dado['receita_com_st']
+        das[competencia] = dado['das']
+        
+        #marca numero_declaracao para não repetir
+        receitas_com_st[f'{competencia}_numero_declaracao'] = dado['numero_declaracao']
+        receitas_sem_st[f'{competencia}_numero_declaracao'] = dado['numero_declaracao']
+        das[f'{competencia}_numero_declaracao'] = dado['numero_declaracao']
+    
+    for nome_arquivo, dado in dados.items():
+        competencia = dado['periodo_apuracao'] # '01/2021'
+        competencia = competencia.split('/')
+        mes = competencia[0]
+        ano = competencia[1]
+        competencia = f'{ano}-{mes.zfill(2)}'
+        
+        is_ja_existe = competencia in receitas_sem_st or competencia in receitas_com_st or competencia in das
+        if not is_ja_existe:
+            insert_dado_para_planilha()
+            
+        else:
+            is_mais_recente = dado['numero_declaracao'] > receitas_sem_st[f'{competencia}_numero_declaracao']
+            if is_mais_recente:
+                insert_dado_para_planilha()
+                print(f'Competência {competencia} já existia e foi atualizada com dados do arquivo {nome_arquivo}')
+    
+    return [
+        receitas_com_st,
+        receitas_sem_st,
+        das
+    ]
 
 def limpar_downloads_pgdas():
     user_download_path = os.path.expanduser('~') + '\\Downloads'
@@ -123,7 +153,15 @@ if __name__ == '__main__':
         driver.close()
         
     else:
-        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False)
+        dados_para_planilha = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False)
+        
+        planilha_path = 'template.xlsx'
+    
+        planilha = Planilha(planilha_path)
+        planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2023)
+        planilha.insert_dados_aba_dados(dados_para_planilha, True)
+        
+        planilha.save('output.xlsx')
     
     print('Fim do programa')
     
