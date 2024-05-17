@@ -29,11 +29,13 @@ def get_driver_ecac_logado(driver=None):
             EC.url_contains('cav.receita.fazenda.gov.br/ecac'))
         
         return driver
-    except:
+    except Exception as e:
+        print(e)
         msgbox('Erro ao tentar fazer login no ECAC')
         return False    
 
 if __name__ == '__main__':
     driver = get_driver_ecac_logado()
     if driver:
+        print('Logado com sucesso')
         driver.close()

@@ -12,9 +12,6 @@ from src.ecac.ecac import get_driver_ecac_logado
 filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
 
 def get_pgdas(driver, anos: list):
-    url = 'https://sinac.cav.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgdasd2018.app/Consulta'        
-    driver.get(url)
-    
     baixar_pgdas(driver, anos)
     
     return get_dados_dos_arquivos_downloads()
@@ -29,8 +26,19 @@ def get_quantidade_downloads():
     return quantidade_arquivos
 
 def baixar_pgdas(driver, anos: list):
+    url = 'https://sinac.cav.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgdasd2018.app/Consulta'        
+    driver.get(url)
     
-    quantidade_arquivos_antes = get_quantidade_downloads(filtro_arquivo_download_regex)
+    url_captcha = "/Captcha"
+    while True:
+        time.sleep(1)
+        if url_captcha not in driver.current_url:
+            break
+        
+    if url not in driver.current_url:
+        driver.get(url)
+    
+    quantidade_arquivos_antes = get_quantidade_downloads()
     
     selector_input_ano = 'form input#ano'
     selector_button_submit = 'form button[type=submit]'
@@ -56,7 +64,7 @@ def baixar_pgdas(driver, anos: list):
         while True:
             tentativas += 1
             
-            quantidade_arquivos_depois = get_quantidade_downloads(filtro_arquivo_download_regex)
+            quantidade_arquivos_depois = get_quantidade_downloads()
             if quantidade_arquivos_depois == quantidade_arquivos_antes + len(botoes_dowload):
                 break
             
@@ -67,7 +75,7 @@ def baixar_pgdas(driver, anos: list):
     
     return True
 
-def get_dados_dos_arquivos_downloads():
+def get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=False):
     user_download_path = os.path.expanduser('~') + '\\Downloads'
     downloads = os.listdir(user_download_path)
     dados = {}
@@ -80,6 +88,9 @@ def get_dados_dos_arquivos_downloads():
             text = [t.text for t in text_elements]
 
             dados[download] = text
+            if is_salvar_em_arquivo_de_texto:
+                with open(user_download_path + '\\' + download + '.txt', 'w') as f:
+                    f.write('\n'.join(text))
             
     return dados
 
@@ -92,11 +103,18 @@ def limpar_downloads_pgdas():
     return True
 
 if __name__ == '__main__':
-    driver = get_driver_ecac_logado()
-    get_pgdas(driver=driver, anos=[2019, 2020, 2021, 2022, 2023])
-    driver.close()
+    tipo_teste = input('Tipo de teste (1 - Teste de download, 2 - Teste de extração de dados): ')
     
-    #dados = get_dados_dos_arquivos_downloads()
+    if tipo_teste == '1':    
+        driver = get_driver_ecac_logado()
+        if not driver:
+            exit(1)
+    
+        get_pgdas(driver=driver, anos=[2019, 2020, 2021, 2022, 2023])
+        driver.close()
+        
+    else:
+        dados = get_dados_dos_arquivos_downloads(is_salvar_em_arquivo_de_texto=True)
     
     print('Fim do programa')
     
