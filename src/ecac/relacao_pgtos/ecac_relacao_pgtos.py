@@ -95,9 +95,9 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final) -> list[dict[str, d
         return relacao_pgtos, total_pgtos
 
     except Exception as e:
+        print('(ECAC) ERRO NA RELAÇÃO DE PAGAMENTOS')
         print(e)
-        msgbox('Erro ao tentar acessar a aplicação de comprovante de arrecadação')
-        return None, None
+        raise Exception('Erro ao tentar acessar a aplicação de comprovante de arrecadação')
 
 def converter_relacao_pgtos_lista_planilha(relacao_pgtos: dict[str, dict[str, dict[str, str | float]]]) -> list[dict[str, str | float]]:
     lista_planilha = []
