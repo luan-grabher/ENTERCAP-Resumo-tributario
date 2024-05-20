@@ -29,12 +29,14 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, dict[str, str | floa
     for ano in anos:
         for mes in meses:
             mes = str(mes).zfill(2)
-            competencia = f'{mes}{ano}'
+            competencia = f'{mes}/{ano}'
             
             driver.get(link_contribuicao_folha)
             
             selector_input_competencia = 'input#PeriodoApuracaoPesquisa'
-            waitAndSendKeys(driver, selector_input_competencia, competencia)
+            waitCss(driver, selector_input_competencia)
+            driver.find_element(By.CSS_SELECTOR, selector_input_competencia).clear()
+            driver.execute_script(f'document.querySelector("{selector_input_competencia}").value = "{competencia}"')
             
             selctor_button_submit = 'form button[onclick*="submit()"]'
             waitAndClick(driver, selctor_button_submit)
@@ -98,13 +100,13 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, dict[str, str | floa
     }
 
 
-if __name__ == '__main__':
-    tipo_teste = input('Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n')
+if __name__ == '__main__':    
+    tipo_teste = input('Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n3 - Teste competencia\n')
     
     if tipo_teste == '1':
         driver = get_driver_esocial_logado()
         if driver:
-            anos = [2022, 2023]
+            anos = [2023, 2022, 2021, 2020, 2019]
             contribuicao_folha = get_contribuicao_folha(driver, anos)
             print(contribuicao_folha)
             
@@ -143,7 +145,14 @@ if __name__ == '__main__':
         planilha.insert_dados_aba_dados(contribuicao_folha['valor_contribuicao'], True)
         
         planilha.save('output.xlsx')
-    
+    elif tipo_teste == '3':
+        meses = range(1, 13)
+        anos = [2022, 2023]
+        for ano in anos:
+            for mes in meses:
+                mes = str(mes).zfill(2)
+                competencia = f'{mes}/{ano}'
+                print(competencia)
     else:
         print('Tipo de teste inválido')
     

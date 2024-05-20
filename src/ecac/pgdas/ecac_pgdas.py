@@ -16,7 +16,15 @@ filtro_arquivo_download_regex = "PGDASD-.*\\.pdf"
 def get_pgdas(driver, anos: list):
     baixar_pgdas(driver, anos)
     
-    return get_dados_dos_arquivos_downloads()
+    #minimiza o navegador
+    driver.minimize_window()
+    
+    dados_arquivos_download = get_dados_dos_arquivos_downloads()
+    
+    #maximiza o navegador
+    driver.maximize_window()
+    
+    return dados_arquivos_download
 
 def get_quantidade_downloads():
     user_download_path = os.path.expanduser('~') + '\\Downloads'
