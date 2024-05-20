@@ -58,7 +58,9 @@ def gerar_resumo_tributario(cnpj, anos):
         output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {ano_inicial}_{ano_final}.xlsx'
         planilha.save(output_path)
         
+        driver.quit()
         msgbox(f'Planilha gerada com sucesso em {output_path}')
+        return output_path
         
     except Exception as e:
         print('Erro ao gerar resumo tributário:', e)
