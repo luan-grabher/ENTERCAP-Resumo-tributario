@@ -1,5 +1,7 @@
+import os
+from easygui import msgbox
 from src.ecac.ecac import get_driver_ecac_logado
-from src.ecac.pgdas.ecac_pgdas import get_pgdas
+from src.ecac.pgdas.ecac_pgdas import get_pgdas, limpar_downloads_pgdas
 from src.ecac.relacao_pgtos.ecac_relacao_pgtos import converter_relacao_pgtos_lista_planilha, ecac_get_relacao_pgtos
 from src.esocial.contribuicaoFolha.contribuicaoFolha import get_contribuicao_folha
 from src.esocial.esocial import get_driver_esocial_logado
@@ -8,22 +10,31 @@ from src.planilha.planilha import Planilha
 
 def gerar_resumo_tributario(cnpj, anos):
     driver = get_driver_ecac_logado()
+    if not driver:
+        msgbox('Erro ao tentar fazer login no ECAC')
+        return False
+    
     driver = get_driver_esocial_logado(driver)
-
+    if not driver:
+        msgbox('Erro ao tentar fazer login no eSocial')
+        return False
+    
+    anos = sorted(anos, reverse=True)
     ano_final = anos[0]
     ano_inicial = anos[-1]
     
     data_inicial = f'01/01/{ano_inicial}'
     data_final = f'31/12/{ano_final}'
-
+    
+        
     relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(driver, data_inicial=data_inicial, data_final=data_final)
     relacao_pgtos_para_planilha = converter_relacao_pgtos_lista_planilha(relacao_pgtos)
     
+    limpar_downloads_pgdas()
     das_para_planilha = get_pgdas(driver, anos)
+    limpar_downloads_pgdas()
     
-    contribuicao_folha = get_contribuicao_folha(driver, anos)
-    
-    
+    contribuicao_folha = get_contribuicao_folha(driver, anos)    
     
     template_path = 'template.xlsx'
     
@@ -36,11 +47,14 @@ def gerar_resumo_tributario(cnpj, anos):
     planilha.insert_dados_aba_dados(das_para_planilha, True)
     
     planilha.insert_dados_aba_dados(contribuicao_folha['base_calculo'], False)
-    planilha.inserir_valor_dado_na_apresentacao_pela_descricao('FOLHA (Total Período)', 'Folha')
+    planilha.inserir_valor_dado_na_apresentacao_pela_descricao('FOLHA (Total Período)', contribuicao_folha['base_calculo']['descricao'])
     
     planilha.insert_dados_aba_dados(contribuicao_folha['valor_contribuicao'], True)
     
-    planilha.save('output.xlsx')
+    cnpj_numeros = cnpj.replace(r'\D', '')
+    desktop_path = os.path.expanduser('~') + '\\Desktop'
+    output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {ano_inicial}_{ano_final}.xlsx'
+    planilha.save(output_path)
 
 if __name__ == '__main__':
     cnpj = '46.540.315/0001-22'

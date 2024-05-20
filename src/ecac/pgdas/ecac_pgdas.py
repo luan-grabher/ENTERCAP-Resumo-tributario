@@ -36,6 +36,23 @@ def baixar_pgdas(driver, anos: list):
         time.sleep(1)
         if url_captcha not in driver.current_url:
             break
+            
+        try:
+            selector_iframe = 'iframe[src*="hcaptcha"]'
+            iframeElement = driver.find_element(By.CSS_SELECTOR, selector_iframe)
+            driver.switch_to.frame(iframeElement)
+            
+            selector_iframe_checkbox = 'div#checkbox'
+            driver.find_element(By.CSS_SELECTOR, selector_iframe_checkbox).click()
+        except:
+            pass
+        
+        try:
+            driver.switch_to.default_content()
+            selector_bottao_prosseguir = 'button#bntSubmit'
+            driver.find_element(By.CSS_SELECTOR, selector_bottao_prosseguir).click()
+        except:
+            pass
         
     if url not in driver.current_url:
         driver.get(url)
@@ -140,7 +157,17 @@ def limpar_downloads_pgdas():
     downloads = os.listdir(user_download_path)
     for download in downloads:
         if re.match(filtro_arquivo_download_regex, download):
-            os.remove(user_download_path + '\\' + download)
+            try:
+                os.remove(user_download_path + '\\' + download)
+            except:
+                time.sleep(2)
+                
+                try:
+                    os.remove(user_download_path + '\\' + download)
+                except:
+                    pass
+                
+            
     return True
 
 if __name__ == '__main__':
@@ -151,7 +178,7 @@ if __name__ == '__main__':
         if not driver:
             exit(1)
     
-        get_pgdas(driver=driver, anos=[2021])
+        baixar_pgdas(driver=driver, anos=[2022, 2021])
         driver.close()
         
     else:
