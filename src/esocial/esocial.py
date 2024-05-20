@@ -44,8 +44,14 @@ def login(driver):
         driver.find_element(
             By.CSS_SELECTOR, selector_botao_selecionar_certificado).click()
         
-        WebDriverWait(driver, 10).until(
-            EC.url_contains('www.esocial.gov.br/portal/Home/Inicial?tipoEmpregador=EMPREGADOR_GERAL'))
+        esperar_usuario_escolher_certificado = True
+        while esperar_usuario_escolher_certificado:
+            try:
+                WebDriverWait(driver, 2).until(
+                    EC.url_contains('www.esocial.gov.br/portal/Home/Inicial?tipoEmpregador=EMPREGADOR_GERAL'))
+                break
+            except:
+                pass
         
         return True
     except Exception as e:
