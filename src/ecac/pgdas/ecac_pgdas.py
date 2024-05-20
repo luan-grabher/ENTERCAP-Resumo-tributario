@@ -53,11 +53,13 @@ def baixar_pgdas(driver, anos: list):
         driver.find_element(By.CSS_SELECTOR, selector_button_submit).click()
         
         try:
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, selector_botoes_download_pdf)))
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, selector_botoes_download_pdf)))
         except:
+            print(f'Não foi possível encontrar botões de download para o ano {ano}')
             continue
         
         botoes_dowload = driver.find_elements(By.CSS_SELECTOR, selector_botoes_download_pdf)
+        print(f'Baixando {len(botoes_dowload)} arquivos para o ano {ano}')
         for botao in botoes_dowload:
             botao.click()
 
@@ -149,7 +151,7 @@ if __name__ == '__main__':
         if not driver:
             exit(1)
     
-        get_pgdas(driver=driver, anos=[2019, 2020, 2021, 2022, 2023])
+        get_pgdas(driver=driver, anos=[2021])
         driver.close()
         
     else:
