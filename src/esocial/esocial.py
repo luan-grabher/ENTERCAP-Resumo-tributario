@@ -27,6 +27,17 @@ def login(driver):
             (By.CSS_SELECTOR, selector_botao_login_com_gov)))
         driver.find_element(By.CSS_SELECTOR, selector_botao_login_com_gov).click()
         
+        try:
+            if 'www.esocial.gov.br/portal/Home/Inicial?tipoEmpregador=EMPREGADOR_GERAL' in driver.current_url:
+                return True
+            
+            WebDriverWait(driver, 4).until(
+                EC.url_contains('www.esocial.gov.br/portal/Home/Inicial?tipoEmpregador=EMPREGADOR_GERAL'))
+            
+            return True
+        except:
+            pass
+        
         selector_botao_selecionar_certificado = 'button#login-certificate'
         WebDriverWait(driver, 10).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, selector_botao_selecionar_certificado)))
@@ -38,6 +49,8 @@ def login(driver):
         
         return True
     except Exception as e:
+        print('(ESOCIAL) Erro ao tentar fazer login no eSocial:', e)
+        
         return False    
     
 if __name__ == '__main__':
