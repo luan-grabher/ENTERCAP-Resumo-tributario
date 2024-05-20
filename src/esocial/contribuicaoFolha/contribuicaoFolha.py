@@ -1,10 +1,11 @@
+import time
 from src.esocial.esocial import get_driver_esocial_logado
 from src.planilha.planilha import Planilha
 from src.seleniumHelper.seleniumHelper import waitAndClick, waitAndSendKeys, waitCss
 from selenium.webdriver.common.by import By
 
 
-def get_contribuicao_folha(driver, anos: list) -> dict[str, dict[str, str | float]]:
+def get_contribuicao_folha(driver, anos: list) -> dict[str, list[dict[str, str | float]]]:
     url = 'https://www.esocial.gov.br/portal/Home/Inicial?tipoEmpregador=EMPREGADOR_GERAL'
     
     is_already_on_url = driver.current_url == url
@@ -25,8 +26,11 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, dict[str, str | floa
         'descricao': 'INSS - Esocial'
     }
     
-    meses = range(1, 13)    
-    for ano in anos:
+    anos_ordenados = sorted(anos, reverse=True)
+    meses = range(12, 1, -1)
+    
+    is_break_meses_anteriores_indisponiveis = False
+    for ano in anos_ordenados:
         for mes in meses:
             mes = str(mes).zfill(2)
             competencia = f'{mes}/{ano}'
@@ -39,12 +43,22 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, dict[str, str | floa
             driver.execute_script(f'document.querySelector("{selector_input_competencia}").value = "{competencia}"')
             
             selctor_button_submit = 'form button[onclick*="submit()"]'
-            waitAndClick(driver, selctor_button_submit)
+            waitAndClick(driver, selctor_button_submit)            
             
-            selector_avisp_erro = 'div.fade-alert.alert.alert-danger.retornoServidor'
+            selector_aviso_erro = 'div.fade-alert.alert.alert-danger.retornoServidor'
             try:
-                waitCss(driver, selector_avisp_erro, 3)
+                waitCss(driver, selector_aviso_erro, 3)
                 print(f'Competência {competencia} indisponível')
+                
+                selector_span_aviso_erro = 'div.fade-alert.alert.alert-danger.retornoServidor span'
+                element_span_aviso_erro = driver.find_element(By.CSS_SELECTOR, selector_span_aviso_erro)
+                texto_aviso_erro = element_span_aviso_erro.text
+                
+                if 'deve ser superior ao mês/ano de início do empregador no eSocial.' in texto_aviso_erro:
+                    is_break_meses_anteriores_indisponiveis = True
+                    print(f'Meses anteriores a partir de {competencia} indisponíveis')
+                    break
+                                
                 continue
             except:
                 pass
@@ -93,20 +107,23 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, dict[str, str | floa
             
             base_calculo_planilha[f'{ano}-{mes}'] = float(base_calculo.replace('.', '').replace(',', '.')) if base_calculo else 0
             valor_contribuicao_planilha[f'{ano}-{mes}'] = float(valor_contribuicao.replace('.', '').replace(',', '.')) if valor_contribuicao else 0
-    
+
+        if is_break_meses_anteriores_indisponiveis:
+            break
+        
     return {
-        'base_calculo': list(base_calculo_planilha),
-        'valor_contribuicao': list(valor_contribuicao_planilha)
+        'base_calculo': [base_calculo_planilha],
+        'valor_contribuicao': [valor_contribuicao_planilha]
     }
 
 
 if __name__ == '__main__':    
-    tipo_teste = input('Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n3 - Teste competencia\n')
+    tipo_teste = input('Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n3 - Teste completo\n')
     
     if tipo_teste == '1':
         driver = get_driver_esocial_logado()
         if driver:
-            anos = [2023, 2022, 2021, 2020, 2019]
+            anos = [2022, 2021, 2020, 2019]
             contribuicao_folha = get_contribuicao_folha(driver, anos)
             print(contribuicao_folha)
             
@@ -140,19 +157,28 @@ if __name__ == '__main__':
         planilha = Planilha(planilha_path)
         planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2023)
         planilha.insert_dados_aba_dados(contribuicao_folha['base_calculo'], False)
-        planilha.inserir_valor_dado_na_apresentacao_pela_descricao('FOLHA (Total Período)', 'Folha')
+        planilha.inserir_valor_dado_na_apresentacao_pela_descricao('FOLHA (Total Período)', contribuicao_folha['base_calculo'][0]['descricao'])
         
         planilha.insert_dados_aba_dados(contribuicao_folha['valor_contribuicao'], True)
         
         planilha.save('output.xlsx')
     elif tipo_teste == '3':
-        meses = range(1, 13)
-        anos = [2022, 2023]
-        for ano in anos:
-            for mes in meses:
-                mes = str(mes).zfill(2)
-                competencia = f'{mes}/{ano}'
-                print(competencia)
+        driver = get_driver_esocial_logado()
+        if driver:
+            anos = [2023]
+            contribuicao_folha = get_contribuicao_folha(driver, anos)
+            
+            planilha_path = 'template.xlsx'
+            
+            planilha = Planilha(planilha_path)
+            planilha.inserir_colunas_mes_aba_dados(1, 2023, 12, 2023)
+            planilha.insert_dados_aba_dados(contribuicao_folha['base_calculo'], False)
+            planilha.inserir_valor_dado_na_apresentacao_pela_descricao('FOLHA (Total Período)', contribuicao_folha['base_calculo'][0]['descricao'])
+            
+            planilha.insert_dados_aba_dados(contribuicao_folha['valor_contribuicao'], True)
+            
+            planilha.save('output.xlsx')
+            
     else:
         print('Tipo de teste inválido')
     
