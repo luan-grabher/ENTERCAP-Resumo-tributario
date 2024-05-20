@@ -89,8 +89,8 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, dict[str, str | floa
             print(f'Valor da contribuição descontado: {valor_contribuicao_descontado}')
             print(f'Valor da contribuição: {valor_contribuicao}\n\n')
             
-            base_calculo_planilha[f'{ano}-{mes}'] = float(base_calculo)
-            valor_contribuicao_planilha[f'{ano}-{mes}'] = float(valor_contribuicao)            
+            base_calculo_planilha[f'{ano}-{mes}'] = float(base_calculo.replace('.', '').replace(',', '.')) if base_calculo else 0
+            valor_contribuicao_planilha[f'{ano}-{mes}'] = float(valor_contribuicao.replace('.', '').replace(',', '.')) if valor_contribuicao else 0
     
     return {
         'base_calculo': list(base_calculo_planilha),
