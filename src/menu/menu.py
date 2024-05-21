@@ -1,7 +1,7 @@
 from easygui import buttonbox, choicebox, msgbox
 
 from src.gerar_resumo_tributario.gerar_resumo_tributario import gerar_resumo_tributario
-from src.menu.inputs_usuario import get_anos, get_cnpj
+from src.menu.inputs_usuario import get_anos, get_cnpj, get_razao_social
 from src.menu.pre_run import pre_run
 
 MENU = {
@@ -25,8 +25,9 @@ def main():
             if opcao_escolhida == MENU['gerar_resumo_tributario']:
                 cnpj = get_cnpj()
                 anos = get_anos()
+                razao_social = get_razao_social()
                                 
-                gerar_resumo_tributario(cnpj, anos)
+                gerar_resumo_tributario(cnpj, anos, razao_social)
                 
             elif opcao_escolhida == MENU['sair']:
                 break

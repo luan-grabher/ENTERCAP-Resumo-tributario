@@ -25,8 +25,16 @@ def get_anos():
     
     return anos_escolhidos
 
+def get_razao_social():
+    msg = 'Digite a razão social da empresa:'
+    title = 'Resumo Tributário Menu'
+    razao_social = textbox(msg, title)
+    razao_social = razao_social.upper()
+    
+    return razao_social
+
 if __name__ == '__main__':
-    tipo_teste = input('Tipo de teste:\n1 - Teste de CNPJ\n2 - Teste de Anos\n')
+    tipo_teste = input('Tipo de teste:\n1 - Teste de CNPJ\n2 - Teste de Anos\n3 - Teste de Razão Social\n')
     
     if tipo_teste == '1':    
         cnpj = get_cnpj()
@@ -34,5 +42,8 @@ if __name__ == '__main__':
     elif tipo_teste == '2':
         anos = get_anos()
         msgbox(f'Anos escolhidos: {anos}')
+    elif tipo_teste == '3':
+        razao_social = get_razao_social()
+        msgbox(f'Razão social digitada: {razao_social}')
     else:
         msgbox('Nenhuma opção selecionada')

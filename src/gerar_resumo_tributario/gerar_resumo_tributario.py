@@ -9,7 +9,7 @@ from src.esocial.esocial import get_driver_esocial_logado
 from src.planilha.planilha import Planilha
 
 
-def gerar_resumo_tributario(cnpj, anos):
+def gerar_resumo_tributario(cnpj, anos, razao_social):
     driver = get_driver_ecac_logado()
     if not driver:
         msgbox('Erro ao tentar fazer login no ECAC')
@@ -42,7 +42,7 @@ def gerar_resumo_tributario(cnpj, anos):
         
         planilha = Planilha(template_path)
         planilha.set_CNPJ(cnpj)
-        planilha.set_EMPRESA('Empresa ABC LTDA') # TODO: desenvolver get_razao_social(cnpj)
+        planilha.set_EMPRESA(razao_social)
         
         planilha.inserir_colunas_mes_aba_dados(1, int(ano_inicial), 12, int(ano_final))
         planilha.insert_dados_aba_dados(relacao_pgtos_para_planilha, True)
@@ -70,7 +70,7 @@ def gerar_resumo_tributario(cnpj, anos):
 
 if __name__ == '__main__':
     cnpj = '46.540.315/0001-22'
-    
+    razao_social = 'BAZAR TOTAL'
     anos = ['2023', '2022', '2021']
     
-    gerar_resumo_tributario(cnpj, anos)
+    gerar_resumo_tributario(cnpj, anos, razao_social)
