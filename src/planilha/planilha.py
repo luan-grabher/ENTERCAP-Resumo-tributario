@@ -225,5 +225,6 @@ if __name__ == '__main__':
         }
     ])
     planilha.inserir_linha_dados_na_apresentacao(2)
+    planilha.ajustar_width_colunas_aba('Dados')
     
     planilha.save('output.xlsx')

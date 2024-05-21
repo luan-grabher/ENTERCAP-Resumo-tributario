@@ -53,6 +53,8 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
         
         planilha.insert_dados_aba_dados(contribuicao_folha['valor_contribuicao'], True)
         
+        planilha.ajustar_width_colunas_aba('Dados')
+        
         cnpj_numeros = re.sub(r'\D', '', cnpj)
         desktop_path = os.path.expanduser('~') + '\\Desktop'
         output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {ano_inicial}_{ano_final}.xlsx'
