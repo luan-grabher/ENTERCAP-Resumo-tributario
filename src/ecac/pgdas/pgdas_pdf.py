@@ -28,9 +28,9 @@ def get_receitas(text: str) -> tuple:
             
             valor_receita = valor_receita[0]
             
-            if 'Sem substituição tributária' in receita and receita_sem_st == 0:
+            if 'Sem substituição tributária' in receita:
                 receita_sem_st += float(valor_receita.replace('.', '').replace(',', '.'))
-            elif 'Com substituição tributária' in receita and receita_com_st == 0:
+            elif 'Com substituição tributária' in receita:
                 receita_com_st += float(valor_receita.replace('.', '').replace(',', '.'))
         
     return receita_sem_st, receita_com_st

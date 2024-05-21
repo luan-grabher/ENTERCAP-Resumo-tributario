@@ -32,7 +32,7 @@ Com base na tabela extraida:
 	- [x] Em qtd colocar a quantidade de meses que tem valor
 
 	- [x] Verificar com Regis o que fazer quando existem várias empresas
-	- [ ] Somar todas receitas com ST e sem ST quando houver mais de uma empresa
+	- [x] Somar todas receitas com ST e sem ST quando houver mais de uma empresa
 
 
 - Caixa "Total geral empresa"
