@@ -63,50 +63,55 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, list[dict[str, str |
             except:
                 pass
             
-            
-            selector_tabela_resumo_linhas = 'td[data-col="Bases de Cálculo"] tbody tr'
             try:
-                waitCss(driver, selector_tabela_resumo_linhas, 5)                
-            except:
-                print(f'Competência {competencia} sem dados')
-                continue
-            
-            
-            elementos_linhas = driver.find_elements(By.CSS_SELECTOR, selector_tabela_resumo_linhas)
-            
-            base_calculo = None
-            valor_contribuicao_descontado = None
-            valor_contribuicao = None
-            
-            for elemento_linha in elementos_linhas:
-                quantidade_colunas = len(elemento_linha.find_elements(By.CSS_SELECTOR, 'td'))
-                
-                tem_mais_de_duas_colunas = quantidade_colunas >= 2
-                if not tem_mais_de_duas_colunas:
+                selector_tabela_resumo_linhas = 'td[data-col="Bases de Cálculo"] tbody tr'
+                try:
+                    waitCss(driver, selector_tabela_resumo_linhas, 5)                
+                except:
+                    print(f'Competência {competencia} sem dados')
                     continue
                 
-                colunas = elemento_linha.find_elements(By.CSS_SELECTOR, 'td')
                 
-                is_primeira_coluna_base_calculo = colunas[0].get_attribute('data-col') == 'Bases de Cálculo'
-                if is_primeira_coluna_base_calculo:
-                    ultima_coluna = colunas[-1]
-                    base_calculo = ultima_coluna.text
-                    continue
+                elementos_linhas = driver.find_elements(By.CSS_SELECTOR, selector_tabela_resumo_linhas)
+                
+                base_calculo = None
+                valor_contribuicao_descontado = None
+                valor_contribuicao = None
+                
+                for elemento_linha in elementos_linhas:
+                    quantidade_colunas = len(elemento_linha.find_elements(By.CSS_SELECTOR, 'td'))
+                    
+                    tem_mais_de_duas_colunas = quantidade_colunas >= 2
+                    if not tem_mais_de_duas_colunas:
+                        continue
+                    
+                    colunas = elemento_linha.find_elements(By.CSS_SELECTOR, 'td')
+                    
+                    is_primeira_coluna_base_calculo = colunas[0].get_attribute('data-col') == 'Bases de Cálculo'
+                    if is_primeira_coluna_base_calculo:
+                        ultima_coluna = colunas[-1]
+                        base_calculo = ultima_coluna.text
+                        continue
 
-                is_primeira_coluna_valor_contribuicao = colunas[0].get_attribute('data-col') == 'Contribuições do Segurado'
-                if is_primeira_coluna_valor_contribuicao:
-                    valor_contribuicao_descontado = colunas[1].text
-                    valor_contribuicao = colunas[2].text
-                    continue
-            
-            
-            print(f'Competência: {competencia}')
-            print(f'Base de cálculo: {base_calculo}')
-            print(f'Valor da contribuição descontado: {valor_contribuicao_descontado}')
-            print(f'Valor da contribuição: {valor_contribuicao}\n\n')
-            
-            base_calculo_planilha[f'{ano}-{mes}'] = float(base_calculo.replace('.', '').replace(',', '.')) if base_calculo else 0
-            valor_contribuicao_planilha[f'{ano}-{mes}'] = float(valor_contribuicao.replace('.', '').replace(',', '.')) if valor_contribuicao else 0
+                    is_primeira_coluna_valor_contribuicao = colunas[0].get_attribute('data-col') == 'Contribuições do Segurado'
+                    if is_primeira_coluna_valor_contribuicao:
+                        valor_contribuicao_descontado = colunas[1].text
+                        valor_contribuicao = colunas[2].text
+                        continue
+                
+                
+                print(f'Competência: {competencia}')
+                print(f'Base de cálculo: {base_calculo}')
+                print(f'Valor da contribuição descontado: {valor_contribuicao_descontado}')
+                print(f'Valor da contribuição: {valor_contribuicao}\n\n')
+                
+                base_calculo_planilha[f'{ano}-{mes}'] = float(base_calculo.replace('.', '').replace(',', '.')) if base_calculo else 0
+                valor_contribuicao_planilha[f'{ano}-{mes}'] = float(valor_contribuicao.replace('.', '').replace(',', '.')) if valor_contribuicao else 0
+                
+            except Exception as e:
+                is_break_meses_anteriores_indisponiveis = True
+                print(f'ESOCIAL - Ocorreu erro na {competencia}, os meses seguintes serão ignorados.\n O erro foi: '+ str(e))
+                break
 
         if is_break_meses_anteriores_indisponiveis:
             break

@@ -7,6 +7,7 @@ import pandas as pd
 
 from src.sefaz.sefaz import get_driver_sefaz_logado, acessar_painel_usuario
 from src.seleniumHelper.seleniumHelper import waitAndClick, waitAndSendKeys, waitCss
+from src.planilha.planilha import Planilha
 
 
 TIPOS_OPERACAO = {
@@ -23,16 +24,25 @@ def get_url_painel_contribuinte(driver, cnpj):
         
     cnpj_so_numeros = ''.join(filter(str.isdigit, cnpj))        
     
-    selector_filtro_cnpj = '#filtroCnpj'
-    waitAndSendKeys(driver, selector_filtro_cnpj, cnpj_so_numeros)
+    try:
+        selector_filtro_cnpj = '#filtroCnpj'
+        waitAndSendKeys(driver, selector_filtro_cnpj, cnpj_so_numeros)
+    except:
+        raise Exception('SEFAZ - Não foi possivel encontrar o campo de filtro de CNPJ')
     
     time.sleep(1)
     
-    selector_link_painel_contribuinte = 'a[href*="Receita/PainelContribuinte"]'
-    driver.find_element(By.CSS_SELECTOR, selector_link_painel_contribuinte).click()
-            
-    WebDriverWait(driver, 10).until(EC.url_contains('/Receita/PainelContribuinte'))
-    url_painel_contribuinte = driver.current_url
+    try:
+        selector_link_painel_contribuinte = 'a[href*="Receita/PainelContribuinte"]'
+        driver.find_element(By.CSS_SELECTOR, selector_link_painel_contribuinte).click()
+    except:
+        raise Exception('SEFAZ - Não foi possivel encontrar o CNPJ na lista de contribuintes')
+    
+    try:
+        WebDriverWait(driver, 10).until(EC.url_contains('/Receita/PainelContribuinte'))
+        url_painel_contribuinte = driver.current_url
+    except:
+        raise Exception('SEFAZ - Não foi possivel acessar o painel do contribuinte')
     
     return url_painel_contribuinte
 
@@ -111,19 +121,89 @@ def get_sefaz_extrato_notas(driver, cnpj, anos: list, tipo_operacao):
             dataframe = pd.read_html(elemento_tabela.get_attribute('outerHTML'))[0]
             resultados[ano] = dataframe
                     
-        return resultados
+        return get_resultados_formato_planilha(resultados, tipo_operacao)
     except Exception as e:
         raise e
         #return False
 
-if __name__ == '__main__':
-    driver = get_driver_sefaz_logado()
-    if driver:
-        cnpj = '46.540.315/0003-94'        
-        anos = [2019, 2020, 2021, 2022, 2023]
-        faturamento = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['emissao'])
-        compras = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['recebimento'])
-        print(faturamento)
-        print(compras)
+def get_resultados_formato_planilha(resultados, tipo_operacao):
+    resultados_formatados = {
+        'descricao': 'FATURAMENTO' if tipo_operacao == TIPOS_OPERACAO['emissao'] else 'COMPRAS'
+    }
+    
+    for ano in resultados:
+        dataframe = resultados[ano]
         
-        driver.close()
+        for index, row in dataframe.iterrows():
+            mes = row['Mês Emit'].split('/')[0]            
+            mes = str(mes).zfill(2)
+                        
+            resultados_formatados[f'{ano}-{mes}'] = float(row['Total NF-e'].replace('.', '').replace(',', '.')) if row['Total NF-e'] else 0
+    
+    return resultados_formatados
+
+if __name__ == '__main__':
+    tipo_teste = input('Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n3 - Teste completo\n')
+    
+    if tipo_teste == '1':
+        
+        driver = get_driver_sefaz_logado()
+        if driver:
+            cnpj = '46.540.315/0003-94'        
+            anos = [2019, 2020, 2021, 2022, 2023]
+            faturamento = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['emissao'])
+            compras = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['recebimento'])
+            print('faturamento', faturamento)
+            print('compras', compras)
+            
+            driver.close()
+            
+    elif tipo_teste == '2':
+        resultados = {
+            2023: pd.DataFrame({
+                'Mês Emit': [11, 12],
+                'Qtd NF-e\'s': [2200, 6069],
+                'Total NF-e': ['93.352,92', '259.887,89'],
+                'Total BC ICMS': ['000', '37.711,13'],
+                'Total ICMS': ['000', '6.410,85'],
+                'Total BC ICMS ST': [0, 0],
+                'Total ICMS ST': [0, 0],
+                'Total FCP': [0, 0],
+                'FCP Interest UF Dest': [0, 0],
+                'ICMS Interest UF Dest': [0, 0],
+                'ICMS Interest UF Rem': [0, 0]
+            }),
+            2022: pd.DataFrame({
+                'Mês Emit': [11, 12],
+                'Qtd NF-e\'s': [17, 4],
+                'Total NF-e': ['127.996,44', '12.858,30'],
+                'Total BC ICMS': ['000', '10.571,16'],
+                'Total ICMS': ['000', '1.268,54'],
+                'Total BC ICMS ST': [0, 0],
+                'Total ICMS ST': [0, 0],
+                'Total FCP': [0, 0],
+                'FCP Interest UF Dest': [0, 0],
+                'ICMS Interest UF Dest': [0, 0],
+                'ICMS Interest UF Rem': [0, 0]
+            })
+        }
+        tipo_operacao_faturamento = 'emissao'
+        tipo_operacao_compras = 'recebimento'
+        
+        dados_faturamento = get_resultados_formato_planilha(resultados, tipo_operacao_faturamento)
+        dados_compras = get_resultados_formato_planilha(resultados, tipo_operacao_compras)
+        
+        
+        planilha_path = 'template.xlsx'
+    
+        planilha = Planilha(planilha_path)
+        planilha.inserir_colunas_mes_aba_dados(1, 2022, 12, 2023)
+        planilha.insert_dados_aba_dados([dados_faturamento], False)
+        planilha.inserir_valor_dado_na_apresentacao_pela_descricao(dados_faturamento['descricao'], dados_faturamento['descricao'])
+        planilha.insert_dados_aba_dados([dados_compras], False)
+        planilha.inserir_valor_dado_na_apresentacao_pela_descricao(dados_compras['descricao'], dados_compras['descricao'])
+        
+        planilha.save('output.xlsx')
+        
+    elif tipo_teste == '3':
+        pass

@@ -71,6 +71,7 @@ class Planilha:
                         '2019-02': 100
                     }
                 ]
+            is_insert_dados_aba_apresentacao: se True, insere a linha na aba de apresentação acima de TRIBUTOS SOBRE VENDAS
         '''
         
         aba_dados = self.workbook['Dados']

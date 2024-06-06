@@ -7,6 +7,9 @@ from src.ecac.relacao_pgtos.ecac_relacao_pgtos import converter_relacao_pgtos_li
 from src.esocial.contribuicaoFolha.contribuicaoFolha import get_contribuicao_folha
 from src.esocial.esocial import get_driver_esocial_logado
 from src.planilha.planilha import Planilha
+from src.sefaz.compras.compras import get_compras_sefaz
+from src.sefaz.faturamento.faturamento import get_faturamento_sefaz
+from src.sefaz.sefaz import get_driver_sefaz_logado
 
 
 def gerar_resumo_tributario(cnpj, anos, razao_social):
@@ -20,6 +23,11 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
         msgbox('Erro ao tentar fazer login no eSocial')
         return False
     
+    driver = get_driver_sefaz_logado(driver)
+    if not driver:
+        msgbox('Erro ao tentar fazer login no Sefaz')
+        return False
+    
     try:
         anos = sorted(anos, reverse=True)
         ano_final = anos[0]
@@ -28,7 +36,10 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
         data_inicial = f'01/01/{ano_inicial}'
         data_final = f'31/12/{ano_final}'
         
-            
+        ### SITES
+        faturamento = get_faturamento_sefaz(driver=driver, cnpj=cnpj, anos=anos)
+        compras = get_compras_sefaz(driver=driver, cnpj=cnpj, anos=anos)     
+                
         relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(driver, data_inicial=data_inicial, data_final=data_final)
         relacao_pgtos_para_planilha = converter_relacao_pgtos_lista_planilha(relacao_pgtos)
         
@@ -37,7 +48,9 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
         limpar_downloads_pgdas()
         
         contribuicao_folha = get_contribuicao_folha(driver, anos)    
+        driver.quit()   
         
+        ### PLANILHA
         template_path = 'template.xlsx'
         
         planilha = Planilha(template_path)
@@ -53,26 +66,33 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
         
         planilha.insert_dados_aba_dados(contribuicao_folha['valor_contribuicao'], True)
         
+        planilha.insert_dados_aba_dados(faturamento, False)
+        planilha.inserir_valor_dado_na_apresentacao_pela_descricao(faturamento[0]['descricao'], faturamento[0]['descricao'])
+        planilha.insert_dados_aba_dados(compras, False)
+        planilha.inserir_valor_dado_na_apresentacao_pela_descricao(compras[0]['descricao'], compras[0]['descricao'])
+        
         planilha.ajustar_width_colunas_aba('Dados')
         
         cnpj_numeros = re.sub(r'\D', '', cnpj)
         desktop_path = os.path.expanduser('~') + '\\Desktop'
         output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {ano_inicial}_{ano_final}.xlsx'
         planilha.save(output_path)
-        
-        driver.quit()
+                
         msgbox(f'Planilha gerada com sucesso em {output_path}')
         return output_path
         
     except Exception as e:
+        print(e)
         print('Erro ao gerar resumo tributário:', e)
-        msgbox('Erro ao gerar resumo tributário')
+        msgbox('Erro ao gerar resumo tributário: '+ str(e))
         
     driver.quit()
 
 if __name__ == '__main__':
-    cnpj = '46.540.315/0001-22'
+    #46.540.315/0003-94
+    #46.540.315/0006-37
+    cnpj = '46.540.315/0003-94'
     razao_social = 'BAZAR TOTAL'
-    anos = ['2023', '2022', '2021']
+    anos = ['2024', '2023', '2022', '2021']
     
     gerar_resumo_tributario(cnpj, anos, razao_social)
