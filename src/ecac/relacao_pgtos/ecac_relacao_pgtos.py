@@ -1,4 +1,5 @@
 import json
+import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -29,6 +30,30 @@ def get_competencia(data: str) -> str:
     
     return f'{ano}-{mes_MM}'
 
+def get_dict_list_from_listagemDARF_html(tableElement) -> list[dict[str, str]]:
+    headers = tableElement.find_elements(By.TAG_NAME, 'th')
+    headers_text = [header.text.replace("\n", ' ') for header in headers]
+    
+    rows = tableElement.find_elements(By.TAG_NAME, 'tr')
+    
+    lista = []
+    
+    for row in rows:
+        colunas = row.find_elements(By.TAG_NAME, 'td')
+        row_dict = dict()
+        
+        for index_coluna, elemento_coluna in enumerate(colunas):
+            if headers_text[index_coluna] in ('', ' '):
+                continue
+            
+            row_dict[headers_text[index_coluna]] = elemento_coluna.text
+        
+        lista.append(row_dict)
+    
+    return lista
+    
+    
+
 def ecac_get_relacao_pgtos(driver, data_inicial, data_final) -> list[dict[str, dict[str, str | float]]]:
 
     try:
@@ -54,11 +79,9 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final) -> list[dict[str, d
         selectorTabelas = "form table#listagemDARF"
         WebDriverWait(driver, 10).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, selectorTabelas)))
-        tabelaElement = driver.find_element(By.CSS_SELECTOR, selectorTabelas)        
+        tabelaElement = driver.find_element(By.CSS_SELECTOR, selectorTabelas)                
         
-        tabelaHtml = tabelaElement.get_attribute('outerHTML')
-        
-        dicionario = pd.read_html(io=io.StringIO(tabelaHtml))[0].to_dict(orient='records')
+        dicionario = get_dict_list_from_listagemDARF_html(tabelaElement)
         
         codigos_receita = get_codigos_receita()
         
@@ -82,6 +105,7 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final) -> list[dict[str, d
             apuracao['Código de Receita'] = item['Código de Receita'] if 'Código de Receita' in item else None
             
             apuracao['Valor Total'] = item['Valor Total'] if 'Valor Total' in item else None
+            print('Valor Total', apuracao['Valor Total'])
             apuracao['Valor Total'] = apuracao['Valor Total'].replace('.', '').replace(',', '.')
             apuracao['Valor Total'] = float(apuracao['Valor Total'])
             total_pgtos+= apuracao['Valor Total']
@@ -122,7 +146,9 @@ if __name__ == '__main__':
     
     if tipo_teste == '1':
         driver = get_driver_ecac_logado()
-        relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(driver, data_inicial='01/03/2019', data_final='31/03/2023')
+        data_inicial = '01/06/2022'
+        data_final = '31/12/2022'
+        relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(driver, data_inicial, data_final)
         print(relacao_pgtos)
         print(total_pgtos)
 
