@@ -15,41 +15,55 @@ TIPOS_OPERACAO = {
     'recebimento': 'Recebimento'
 }
 
-def get_url_painel_contribuinte(driver, cnpj):
-    is_already_on_painel = '/PainelContribuinte' in driver.current_url
-    if is_already_on_painel:
-        return driver.current_url
+def get_cnpjs_painel_contribuinte_urls(driver) -> dict[str, str]:
+    acessar_painel_usuario(driver)    
     
-    acessar_painel_usuario(driver)
+    urls = {}
+    try:
+        selector_primeira_linha_tabela = "table#tblListaVinc tr:first-child th"
+        headers_tabela = driver.find_elements(By.CSS_SELECTOR, selector_primeira_linha_tabela)
         
-    cnpj_so_numeros = ''.join(filter(str.isdigit, cnpj))        
-    
-    try:
-        selector_filtro_cnpj = '#filtroCnpj'
-        waitAndSendKeys(driver, selector_filtro_cnpj, cnpj_so_numeros)
+        coluna_cnpj = None
+        coluna_situacao = None
+        for index, header in enumerate(headers_tabela):
+            idElemento = header.get_attribute('id')
+            if idElemento == 'cnpj14Header':
+                coluna_cnpj = index                
+            elif idElemento == 'situacaoHeader':
+                coluna_situacao = index
+            
+        if coluna_situacao is None:
+            raise Exception('SEFAZ - Não foi possivel encontrar a coluna de situação na tabela de vinculos')
+        
+        selector_linhas_tabela_vinculos = 'table#tblListaVinc tr'
+        elementos_linhas_tabela = driver.find_elements(By.CSS_SELECTOR, selector_linhas_tabela_vinculos)
+        for elemento_linha in elementos_linhas_tabela:
+            selector_situacao = f'td:nth-child({coluna_situacao + 1})'
+            selector_cnpj = f'td:nth-child({coluna_cnpj + 1})'
+            try:
+                situacao = elemento_linha.find_element(By.CSS_SELECTOR, selector_situacao).get_attribute('textContent')
+                if situacao != 'Ativa':
+                    continue
+                
+                cnpj = elemento_linha.find_element(By.CSS_SELECTOR, selector_cnpj).get_attribute('textContent')
+            
+                selector_link_painel_contribuinte = 'a[href*="Receita/PainelContribuinte"]:not([href$="ie="])'
+                elementos_link = elemento_linha.find_elements(By.CSS_SELECTOR, selector_link_painel_contribuinte)
+                
+                for elemento in elementos_link:
+                    link = elemento.get_attribute('href')
+                    urls[cnpj] = link
+            except:
+                pass
+            
     except:
-        raise Exception('SEFAZ - Não foi possivel encontrar o campo de filtro de CNPJ')
+        raise Exception('SEFAZ - Não foi possivel encontrar os links dos CNPJs no painel do contribuinte')
     
-    time.sleep(1)
     
-    try:
-        selector_link_painel_contribuinte = 'a[href*="Receita/PainelContribuinte"]'
-        driver.find_element(By.CSS_SELECTOR, selector_link_painel_contribuinte).click()
-    except:
-        raise Exception('SEFAZ - Não foi possivel encontrar o CNPJ na lista de contribuintes')
-    
-    try:
-        WebDriverWait(driver, 10).until(EC.url_contains('/Receita/PainelContribuinte'))
-        url_painel_contribuinte = driver.current_url
-    except:
-        raise Exception('SEFAZ - Não foi possivel acessar o painel do contribuinte')
-    
-    return url_painel_contribuinte
+    return urls
 
-def get_sefaz_extrato_notas(driver, cnpj, anos: list, tipo_operacao):
-    try:
-        url_painel_contribuinte = get_url_painel_contribuinte(driver, cnpj)
-        
+def get_sefaz_extrato_notas_from_cnpj(driver, url_painel_contribuinte: str, anos: list, tipo_operacao):
+    try:        
         resultados = {}
         
         for ano in anos:       
@@ -142,17 +156,29 @@ def get_resultados_formato_planilha(resultados, tipo_operacao):
     
     return resultados_formatados
 
+def get_sefaz_extrato_notas(driver, anos: list, tipo_operacao):
+    cnpjs_urls = get_cnpjs_painel_contribuinte_urls(driver)
+    
+    resultados = {}
+    
+    for cnpj in cnpjs_urls:
+        cnpj_url = cnpjs_urls[cnpj]
+        resultado = get_sefaz_extrato_notas_from_cnpj(driver, cnpj_url ,anos, tipo_operacao)
+        print(resultado)
+        resultados[cnpj] = resultado
+    
+    return resultados
+
 if __name__ == '__main__':
     tipo_teste = input('Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n3 - Teste completo\n')
     
     if tipo_teste == '1':
         
         driver = get_driver_sefaz_logado()
-        if driver:
-            cnpj = '46.540.315/0003-94'        
-            anos = [2019, 2020, 2021, 2022, 2023]
-            faturamento = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['emissao'])
-            compras = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['recebimento'])
+        if driver:        
+            anos = [2022, 2023]
+            compras = get_sefaz_extrato_notas(driver, anos, TIPOS_OPERACAO['recebimento'])
+            faturamento = get_sefaz_extrato_notas(driver, anos, TIPOS_OPERACAO['emissao'])            
             print('faturamento', faturamento)
             print('compras', compras)
             

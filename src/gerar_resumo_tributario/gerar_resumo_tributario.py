@@ -37,8 +37,8 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
         data_final = f'31/12/{ano_final}'
         
         ### SITES
-        faturamento = get_faturamento_sefaz(driver=driver, cnpj=cnpj, anos=anos)
-        compras = get_compras_sefaz(driver=driver, cnpj=cnpj, anos=anos)     
+        faturamento = get_faturamento_sefaz(driver=driver, anos=anos)
+        compras = get_compras_sefaz(driver=driver, anos=anos)     
                 
         relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(driver, data_inicial=data_inicial, data_final=data_final)
         relacao_pgtos_para_planilha = converter_relacao_pgtos_lista_planilha(relacao_pgtos)

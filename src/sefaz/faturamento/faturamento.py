@@ -3,8 +3,8 @@ from src.planilha.planilha import Planilha
 from src.sefaz.extratosNotas.extratosNotas import TIPOS_OPERACAO, get_sefaz_extrato_notas
 from src.sefaz.sefaz import get_driver_sefaz_logado
 
-def get_faturamento_sefaz(driver, cnpj, anos: list):
-    faturamento = get_sefaz_extrato_notas(driver, cnpj, anos, TIPOS_OPERACAO['emissao'])
+def get_faturamento_sefaz(driver, anos: list):
+    faturamento = get_sefaz_extrato_notas(driver, anos, TIPOS_OPERACAO['emissao'])
     
     return [faturamento]
 
