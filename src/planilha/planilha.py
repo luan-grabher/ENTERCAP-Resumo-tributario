@@ -203,7 +203,19 @@ class Planilha:
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_apresentacao, formula_total, formula_quantidade_meses_com_valor)
         
+    def inserir_soma_dados_na_apresentacao_por_regex(self, descricao_contains: str, descricao_apresentacao: str):
+        aba_dados = self.workbook['Dados']
         
+        linha_apresentacao = self.get_linha_com_descricao_aba_apresentacao(descricao_apresentacao)
+        if linha_apresentacao is None:
+            return
+        
+        coluna_total = aba_dados.max_column
+        
+        formula_total = f'=SUMIF(Dados!A:A, "{descricao_contains}", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
+        formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
+        
+        self.inserir_valor_na_linha_aba_apresentacao(linha_apresentacao, formula_total, formula_quantidade_meses_com_valor)
                                       
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'

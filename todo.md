@@ -1,7 +1,7 @@
 Faturamento e Compras
  [x] Pegar compras e faturamento de todos CNPJs da lista
- [ ] Na aba de dados salvar com 'CNPJ XXX-XXX...' ao lado
- [ ] Na aba apresentação somar todos 'Faturamento' e 'Compras' e colocar como 'Faturamento' e 'Compras'
+ [x] Na aba de dados salvar com 'CNPJ XXX-XXX...' ao lado
+ [x] Na aba apresentação somar todos 'Faturamento' e 'Compras' e colocar como 'Faturamento' e 'Compras'
 
  [x] deve ter (IE - inscricao estadual)
  [x] deve estar ativo
