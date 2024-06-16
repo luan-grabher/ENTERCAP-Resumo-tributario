@@ -12,87 +12,173 @@ from src.sefaz.faturamento.faturamento import get_faturamento_sefaz
 from src.sefaz.sefaz import get_driver_sefaz_logado
 
 
+def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha, das_para_planilha, contribuicao_folha, ano_inicial, ano_final):
+    template_path = 'template.xlsx'
+
+    planilha = Planilha(template_path)
+    planilha.set_CNPJ(cnpj)
+    planilha.set_EMPRESA(razao_social)
+
+    dados_para_inserir_com_aba_apresentacao = relacao_pgtos_para_planilha + \
+        das_para_planilha + contribuicao_folha['valor_contribuicao']
+    dados_para_inserir_somente_aba_dados = faturamento + \
+        compras + contribuicao_folha['base_calculo']
+
+    planilha.inserir_colunas_mes_aba_dados(
+        1, int(ano_inicial), 12, int(ano_final))
+
+    planilha.insert_dados_aba_dados(
+        dados_para_inserir_com_aba_apresentacao, True)
+    planilha.insert_dados_aba_dados(
+        dados_para_inserir_somente_aba_dados, False)
+
+    planilha.inserir_valor_dado_na_apresentacao_pela_descricao(
+        'FOLHA (Total Período)', contribuicao_folha['base_calculo'][0]['descricao'])
+
+    planilha.inserir_soma_dados_na_apresentacao_por_regex(
+        descricao_contains='FATURAMENTO - *', descricao_apresentacao='FATURAMENTO')
+    planilha.inserir_soma_dados_na_apresentacao_por_regex(
+        descricao_contains='COMPRAS - *', descricao_apresentacao='COMPRAS')
+
+    planilha.ajustar_width_colunas_aba('Dados')
+
+    cnpj_numeros = re.sub(r'\D', '', cnpj)
+    desktop_path = os.path.expanduser('~') + '\\Desktop'
+    output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {
+        ano_inicial}_{ano_final}.xlsx'
+    planilha.save(output_path)
+
+    return output_path
+
+
 def gerar_resumo_tributario(cnpj, anos, razao_social):
     driver = get_driver_ecac_logado()
     if not driver:
         msgbox('Erro ao tentar fazer login no ECAC')
         return False
-    
+
     driver = get_driver_esocial_logado(driver)
     if not driver:
         msgbox('Erro ao tentar fazer login no eSocial')
         return False
-    
+
     driver = get_driver_sefaz_logado(driver)
     if not driver:
         msgbox('Erro ao tentar fazer login no Sefaz')
         return False
-    
+
     try:
         anos = sorted(anos, reverse=True)
         ano_final = anos[0]
         ano_inicial = anos[-1]
-        
+
         data_inicial = f'01/01/{ano_inicial}'
         data_final = f'31/12/{ano_final}'
-        
-        ### SITES
+
+        # SITES
         faturamento = get_faturamento_sefaz(driver=driver, anos=anos)
-        compras = get_compras_sefaz(driver=driver, anos=anos)     
-                
-        relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(driver, data_inicial=data_inicial, data_final=data_final)
-        relacao_pgtos_para_planilha = converter_relacao_pgtos_lista_planilha(relacao_pgtos)
-        
+        compras = get_compras_sefaz(driver=driver, anos=anos)
+
+        relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(
+            driver, data_inicial=data_inicial, data_final=data_final)
+        relacao_pgtos_para_planilha = converter_relacao_pgtos_lista_planilha(
+            relacao_pgtos)
+
         limpar_downloads_pgdas()
         das_para_planilha = get_pgdas(driver, anos)
         limpar_downloads_pgdas()
-        
-        contribuicao_folha = get_contribuicao_folha(driver, anos)    
-        driver.quit()   
-        
-        ### PLANILHA
-        template_path = 'template.xlsx'
-        
-        planilha = Planilha(template_path)
-        planilha.set_CNPJ(cnpj)
-        planilha.set_EMPRESA(razao_social)
-        
-        planilha.inserir_colunas_mes_aba_dados(1, int(ano_inicial), 12, int(ano_final))
-        planilha.insert_dados_aba_dados(relacao_pgtos_para_planilha, True)
-        planilha.insert_dados_aba_dados(das_para_planilha, True)
-        
-        planilha.insert_dados_aba_dados(contribuicao_folha['base_calculo'], False)
-        planilha.inserir_valor_dado_na_apresentacao_pela_descricao('FOLHA (Total Período)', contribuicao_folha['base_calculo'][0]['descricao'])
-        
-        planilha.insert_dados_aba_dados(contribuicao_folha['valor_contribuicao'], True)
-        
-        planilha.insert_dados_aba_dados(faturamento, False)
-        planilha.inserir_valor_dado_na_apresentacao_pela_descricao(faturamento[0]['descricao'], faturamento[0]['descricao'])
-        planilha.insert_dados_aba_dados(compras, False)
-        planilha.inserir_valor_dado_na_apresentacao_pela_descricao(compras[0]['descricao'], compras[0]['descricao'])
-        
-        planilha.ajustar_width_colunas_aba('Dados')
-        
-        cnpj_numeros = re.sub(r'\D', '', cnpj)
-        desktop_path = os.path.expanduser('~') + '\\Desktop'
-        output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {ano_inicial}_{ano_final}.xlsx'
-        planilha.save(output_path)
-                
+
+        contribuicao_folha = get_contribuicao_folha(driver, anos)
+        driver.quit()
+
+        # PLANILHA
+        output_path = create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha,
+                                      das_para_planilha, contribuicao_folha, ano_inicial, ano_final)
+
         msgbox(f'Planilha gerada com sucesso em {output_path}')
         return output_path
-        
+
     except Exception as e:
         print(e)
         print('Erro ao gerar resumo tributário:', e)
-        msgbox('Erro ao gerar resumo tributário: '+ str(e))
-        
+        msgbox('Erro ao gerar resumo tributário: ' + str(e))
+
     driver.quit()
 
+
 if __name__ == '__main__':
-    #46.540.315/0003-94
-    #46.540.315/0006-37
-    cnpj = '46.540.315/0003-94'
-    razao_social = 'BAZAR TOTAL'
-    anos = ['2024', '2023', '2022', '2021']
-    
-    gerar_resumo_tributario(cnpj, anos, razao_social)
+    tipo_teste = input(
+        'Tipo de teste:\n1 - Teste completo\n2 - Teste Create Planilha\n')
+
+    if tipo_teste == '1':
+        # 46.540.315/0003-94
+        # 46.540.315/0006-37
+        cnpj = '46.540.315/0003-94'
+        razao_social = 'BAZAR TOTAL'
+        anos = ['2024', '2023', '2022', '2021']
+
+        gerar_resumo_tributario(cnpj, anos, razao_social)
+
+    elif tipo_teste == '2':
+        cnpj = '46.540.315/0003-94'
+        razao_social = 'BAZAR TOTAL'
+        faturamento = [
+            {
+                'descricao': 'FATURAMENTO - 12345678901234', '2023-11': 93352.92, '2023-12': 93352.92
+            },
+            {
+                'descricao': 'FATURAMENTO - 12345678901235',
+                '2023-11': 93352.92,
+                '2023-12': 93352.92
+            }
+        ]
+        compras = [{'descricao': 'COMPRAS - 12345678901234', '2023-11': 93352.92, '2023-12': 93352.92},
+                   {'descricao': 'COMPRAS - 12345678901235', '2023-11': 93352.92, '2023-12': 93352.92}]
+        relacao_pgtos_para_planilha = [
+            {'descricao': '0211 - IRPF - Carnê-Leão', '2023-03': 100.0, '2023-04': 200.0}
+        ]
+        das_para_planilha = [
+            {
+                'descricao': 'Receita sem ST',
+                '2022-11': 100.0,
+                '2022-12': 200.0,
+            },
+            {
+                'descricao': 'Receita com ST',
+                '2022-11': 100.0,
+                '2022-12': 200.0,
+            },
+            {
+                'descricao': 'Simples Nacional',
+                '2022-11': 100.0,
+                '2022-12': 200.0,
+            }
+        ]
+        contribuicao_folha = {
+            'base_calculo': [{
+                'descricao': 'Folha',
+                '2022-01': 100.0,
+                '2022-02': 200.0,
+                '2022-03': 300.0,
+                '2022-04': 400.0,
+                '2022-05': 500.0,
+                '2022-06': 600.0,
+                '2022-07': 700.0,
+            }],
+            'valor_contribuicao': [{
+                'descricao': 'INSS - Esocial',
+                '2022-01': 10.0,
+                '2022-02': 20.0,
+                '2022-03': 30.0,
+                '2022-04': 40.0,
+                '2022-05': 50.0,
+                '2022-06': 60.0,
+                '2022-07': 70.0,
+            }]
+        }
+
+        ano_inicial = '2022'
+        ano_final = '2024'
+
+        create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha,
+                        das_para_planilha, contribuicao_folha, ano_inicial, ano_final)

@@ -6,7 +6,7 @@ from src.sefaz.sefaz import get_driver_sefaz_logado
 def get_faturamento_sefaz(driver, anos: list):
     faturamento = get_sefaz_extrato_notas(driver, anos, TIPOS_OPERACAO['emissao'])
     
-    return [faturamento]
+    return faturamento
 
 if __name__ == '__main__':
     tipo_teste = input('Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n3 - Teste completo\n')

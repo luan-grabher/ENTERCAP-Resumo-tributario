@@ -283,6 +283,9 @@ if __name__ == '__main__':
         compras_1 = get_resultados_formato_planilha(resultados_sefaz, tipo_operacao_compras, cnpj1)
         compras_2 = get_resultados_formato_planilha(resultados_sefaz, tipo_operacao_compras, cnpj2)
         
+        print('faturamento', [faturamento_1 , faturamento_2])
+        print('compras', [compras_1, compras_2])
+        
         test_create_planilha([faturamento_1, faturamento_2], [compras_1, compras_2])
         
 
