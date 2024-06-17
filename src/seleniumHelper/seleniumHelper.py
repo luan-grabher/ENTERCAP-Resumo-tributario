@@ -12,5 +12,6 @@ def waitAndClick(driver, cssSelector, timeout=10):
 
 def waitAndSendKeys(driver, cssSelector, keys, timeout=10):
     waitCss(driver, cssSelector, timeout)
+    driver.find_element(By.CSS_SELECTOR, cssSelector).clear()
     driver.find_element(By.CSS_SELECTOR, cssSelector).send_keys(keys)
     

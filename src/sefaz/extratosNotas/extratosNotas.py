@@ -3,7 +3,6 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-import pandas as pd
 
 from src.sefaz.sefaz import get_driver_sefaz_logado, acessar_painel_usuario
 from src.seleniumHelper.seleniumHelper import waitAndClick, waitAndSendKeys, waitCss

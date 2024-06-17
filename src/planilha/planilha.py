@@ -161,12 +161,7 @@ class Planilha:
             'formula_quantidade_meses_com_valor': formula_quantidade_meses_com_valor
         }
     
-    def inserir_linha_dados_na_apresentacao(self, linha: int):
-        dado = self.get_dado_by_linha(linha)
-        descricao = dado['descricao']
-        formula_total = dado['formula_total']
-        formula_quantidade_meses_com_valor = dado['formula_quantidade_meses_com_valor']
-            
+    def inserir_linha_aba_apresentacao(self, descricao: str):
         linha_TRIBUTOS_SOBRE_VENDAS = self.get_linha_com_descricao_aba_apresentacao('% TRIBUTOS SOBRE VENDAS')
         
         #insere linha acima da linha de tributos sobre vendas
@@ -185,7 +180,18 @@ class Planilha:
         
         aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_B, value=descricao)
         
-        self.inserir_valor_na_linha_aba_apresentacao(linha_TRIBUTOS_SOBRE_VENDAS, formula_total, formula_quantidade_meses_com_valor)
+        linha_para_inserir = linha_TRIBUTOS_SOBRE_VENDAS
+        return linha_para_inserir
+    
+    def inserir_linha_dados_na_apresentacao(self, linha: int):
+        dado = self.get_dado_by_linha(linha)
+        descricao = dado['descricao']
+        formula_total = dado['formula_total']
+        formula_quantidade_meses_com_valor = dado['formula_quantidade_meses_com_valor']
+            
+        linha_para_inserir = self.inserir_linha_aba_apresentacao(descricao, formula_total, formula_quantidade_meses_com_valor)
+        
+        self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)                
             
             
     def inserir_valor_dado_na_apresentacao_pela_descricao(self, descricao_apresentacao, descricao_dados):
@@ -216,6 +222,23 @@ class Planilha:
         formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_apresentacao, formula_total, formula_quantidade_meses_com_valor)
+    
+    def inserir_soma_dados_na_apresentacao_por_regex_acima_de_TRIBUTOS(self, descricao_contains: str, descricao_apresentacao: str):
+        # com base na descricao da aba dados, insere a soma dos valores na aba apresentacao acima de TRIBUTOS SOBRE VENDAS
+        # Semelhante a inserir_soma_dados_na_apresentacao_por_regex, mas insere acima de TRIBUTOS SOBRE VENDAS e com uma descrição definida ao invés de uma que já esteja na planilha
+        linha_para_inserir = self.inserir_linha_aba_apresentacao(descricao_apresentacao)
+        
+        if linha_para_inserir is None:
+            return
+        
+        aba_dados = self.workbook['Dados']
+        
+        coluna_total = aba_dados.max_column
+        
+        formula_total = f'=SUMIF(Dados!A:A, "{descricao_contains}", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
+        formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
+        
+        self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)
                                       
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'
