@@ -93,6 +93,9 @@ def ecac_get_relacao_pgtos(driver, data_inicial, data_final) -> list[dict[str, d
             if not codigo_receita:
                 continue
             
+            codigo_receita = int(codigo_receita) # Convertendo para int para remover zeros a esquerda
+            codigo_receita = str(codigo_receita)
+            
             if codigo_receita not in relacao_pgtos:
                 relacao_pgtos[codigo_receita] = dict()
             
