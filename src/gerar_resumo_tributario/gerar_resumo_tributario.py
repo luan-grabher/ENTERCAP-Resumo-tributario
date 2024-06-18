@@ -8,11 +8,12 @@ from src.esocial.contribuicaoFolha.contribuicaoFolha import get_contribuicao_fol
 from src.esocial.esocial import get_driver_esocial_logado
 from src.planilha.planilha import Planilha
 from src.sefaz.compras.compras import get_compras_sefaz
+from src.sefaz.contaCorrenteFiscal.contaCorrenteFiscal import get_conta_corrente_fiscal
 from src.sefaz.faturamento.faturamento import get_faturamento_sefaz
 from src.sefaz.sefaz import get_driver_sefaz_logado
 
 
-def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha, das_para_planilha, contribuicao_folha, ano_inicial, ano_final):
+def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha, das_para_planilha, contribuicao_folha, ano_inicial, ano_final, conta_corrente_fiscal):
     template_path = 'template.xlsx'
 
     planilha = Planilha(template_path)
@@ -22,7 +23,7 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
     dados_para_inserir_com_aba_apresentacao = relacao_pgtos_para_planilha + \
         das_para_planilha + contribuicao_folha['valor_contribuicao']
     dados_para_inserir_somente_aba_dados = faturamento + \
-        compras + contribuicao_folha['base_calculo']
+        compras + contribuicao_folha['base_calculo'] + conta_corrente_fiscal
 
     planilha.inserir_colunas_mes_aba_dados(
         1, int(ano_inicial), 12, int(ano_final))
@@ -39,6 +40,8 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
         descricao_contains='FATURAMENTO - *', descricao_apresentacao='FATURAMENTO')
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
         descricao_contains='COMPRAS - *', descricao_apresentacao='COMPRAS')
+    
+    planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_TRIBUTOS('GIA Mensal - *', 'ICMS - Saldo Credor')
 
     planilha.ajustar_width_colunas_aba('Dados')
 
@@ -78,6 +81,7 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
         # SITES
         faturamento = get_faturamento_sefaz(driver=driver, anos=anos)
         compras = get_compras_sefaz(driver=driver, anos=anos)
+        conta_corrente_fiscal = get_conta_corrente_fiscal(driver, anos)
 
         relacao_pgtos, total_pgtos = ecac_get_relacao_pgtos(
             driver, data_inicial=data_inicial, data_final=data_final)
@@ -93,7 +97,7 @@ def gerar_resumo_tributario(cnpj, anos, razao_social):
 
         # PLANILHA
         output_path = create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha,
-                                      das_para_planilha, contribuicao_folha, ano_inicial, ano_final)
+                                      das_para_planilha, contribuicao_folha, ano_inicial, ano_final, conta_corrente_fiscal)
 
         msgbox(f'Planilha gerada com sucesso em {output_path}')
         return output_path
@@ -176,9 +180,11 @@ if __name__ == '__main__':
                 '2022-07': 70.0,
             }]
         }
+        
+        conta_corrente_fiscal = [{'descricao': 'ICMS DIF AL - 46.540.315/0003-94', '2023-11': 0.0, '2023-12': 0.0, '2024-01': 0.0, '2024-02': 0.0, '2024-03': 0.0}, {'descricao': 'ICMS Mensal - 46.540.315/0003-94', '2024-03': 10674.46}, {'descricao': 'ICMS - Fundo Combate a Pobresa - 46.540.315/0003-94'}, {'descricao': 'GIA Mensal - 46.540.315/0003-94'}, {'descricao': 'ICMS DIF AL - 46.540.315/0006-37', '2023-12': 0.0, '2024-01': 0.0, '2024-02': 0.0, '2024-03': 0.0}, {'descricao': 'ICMS Mensal - 46.540.315/0006-37'}, {'descricao': 'ICMS - Fundo Combate a Pobresa - 46.540.315/0006-37'}, {'descricao': 'GIA Mensal - 46.540.315/0006-37'}]
 
         ano_inicial = '2022'
         ano_final = '2024'
 
         create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha,
-                        das_para_planilha, contribuicao_folha, ano_inicial, ano_final)
+                        das_para_planilha, contribuicao_folha, ano_inicial, ano_final, conta_corrente_fiscal)

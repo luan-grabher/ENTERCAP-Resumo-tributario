@@ -311,4 +311,11 @@ if __name__ == '__main__':
         test_create_planilha(resultados_para_planilha)
 
     elif tipo_teste == '3':
-        pass
+        driver = get_driver_sefaz_logado()
+        if driver:
+            anos = [2022, 2023, 2024]
+            conta_corrente_fiscal = get_conta_corrente_fiscal(driver, anos)
+            print(conta_corrente_fiscal)
+
+            driver.close()
+            test_create_planilha(conta_corrente_fiscal)

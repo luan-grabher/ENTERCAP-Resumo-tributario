@@ -189,7 +189,7 @@ class Planilha:
         formula_total = dado['formula_total']
         formula_quantidade_meses_com_valor = dado['formula_quantidade_meses_com_valor']
             
-        linha_para_inserir = self.inserir_linha_aba_apresentacao(descricao, formula_total, formula_quantidade_meses_com_valor)
+        linha_para_inserir = self.inserir_linha_aba_apresentacao(descricao)
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)                
             

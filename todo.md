@@ -9,4 +9,4 @@ CONTA CORRENTE FISCAL
  [x] Pegar 'GIA Mensal' pela descricao 'GIA Mensal - Saldo Zerado' ou 'GIA Mensal - Saldo Credor: R$ 9.999,99'
 
  [x] Colocar na aba apresentação 'GIA Mensal' como 'ICMS - Saldo Credor'
- [ ] Adicionar chamada no gerar_resumo_tributario
+ [x] Adicionar chamada no gerar_resumo_tributario
