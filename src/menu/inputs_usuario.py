@@ -3,7 +3,7 @@ import time
 from easygui import msgbox, textbox, multchoicebox
 
 def get_cnpj():
-    msg = 'Digite o CNPJ da empresa:'
+    msg = 'Digite o CNPJ da empresa ( somente numeros ou no formato XX.XXX.XXX/XXXX-XX )'
     title = 'Resumo Tributário Menu'
     cnpj = textbox(msg, title)
     

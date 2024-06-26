@@ -162,3 +162,5 @@ chromedriver.exe
 
 output.xlsx
 ~$output.xlsx
+
+/output
