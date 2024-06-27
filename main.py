@@ -9,9 +9,9 @@ try:
     from src.menu.menu import main
 
     main()
-    exit(0)
 
 except Exception as e:
     print('Erro inesperado durante a execução:\n\n' + str(e))
-    input('Pressione qualquer tecla para sair...')
     exit(1)
+
+exit(0)
