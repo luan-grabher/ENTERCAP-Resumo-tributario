@@ -35,7 +35,7 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, list[dict[str, str |
     is_break_meses_anteriores_indisponiveis = False
     for ano in anos_ordenados:
         for mes in meses:
-            if ano == ano_atual and int(mes) > mes_atual:
+            if int(ano) == int(ano_atual) and int(mes) >= int(mes_atual):
                 continue            
             
             mes = str(mes).zfill(2)

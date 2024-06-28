@@ -142,6 +142,8 @@ def get_conta_corrente_fiscal_from_cnpj(driver, url_painel_contribuinte: str, an
         # return False
 
 def get_string_value_as_float(string_value: str) -> float:
+    string_value = ''.join(filter(lambda x: x in '0123456789.,', string_value))
+    
     if not string_value:
         return 0
     
@@ -185,12 +187,14 @@ def get_resultados_formato_planilha(resultados: dict[str, list[dict[str, str]]],
             elif descricao == 'GUIA DE ARRECADACAO-FCP/ICMS-PR':
                 valor = get_string_value_as_float(linha_tabela.get('Valor', '0,00'))
                 resultados_dict['ICMS - Fundo Combate a Pobresa'][referencia] = valor
-            elif descricao == 'GIA Mensal - Saldo Zerado' or 'GIA Mensal - Saldo Credor' in descricao:
+            elif descricao == 'GIA Mensal - Saldo Zerado' or 'GIA Mensal - Saldo Credor' in descricao or descricao == 'GIA Mensal':
                 is_zerado = 'Zerado' in descricao
                 if is_zerado:
                     valor = 0
+                elif descricao == 'GIA Mensal':
+                    valor = get_string_value_as_float(linha_tabela.get('Valor', '0,00'))
                 else:
-                    valor_by_split = descricao.split('R$')
+                    valor_by_split = descricao.split('Credor')
                     valor = get_string_value_as_float(valor_by_split[-1])
                     
                 resultados_dict['GIA Mensal'][referencia] = valor
