@@ -219,7 +219,7 @@ def get_conta_corrente_fiscal(driver, anos: list) -> list[dict[str, dict[str, st
 def test_webdriver():
     driver = get_driver_sefaz_logado()
     if driver:
-        anos = [2022, 2023, 2024]
+        anos = [2024]
         conta_corrente_fiscal = get_conta_corrente_fiscal(driver, anos)
         print(conta_corrente_fiscal)
 
