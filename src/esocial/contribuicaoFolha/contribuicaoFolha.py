@@ -29,9 +29,15 @@ def get_contribuicao_folha(driver, anos: list) -> dict[str, list[dict[str, str |
     anos_ordenados = sorted(anos, reverse=True)
     meses = range(12, 1, -1)
     
+    ano_atual = time.localtime().tm_year
+    mes_atual = time.localtime().tm_mon
+    
     is_break_meses_anteriores_indisponiveis = False
     for ano in anos_ordenados:
         for mes in meses:
+            if ano == ano_atual and mes > mes_atual:
+                continue            
+            
             mes = str(mes).zfill(2)
             competencia = f'{mes}/{ano}'
             
@@ -128,7 +134,7 @@ if __name__ == '__main__':
     if tipo_teste == '1':
         driver = get_driver_esocial_logado()
         if driver:
-            anos = [2022, 2021, 2020, 2019]
+            anos = [2024]
             contribuicao_folha = get_contribuicao_folha(driver, anos)
             print(contribuicao_folha)
             
@@ -170,13 +176,13 @@ if __name__ == '__main__':
     elif tipo_teste == '3':
         driver = get_driver_esocial_logado()
         if driver:
-            anos = [2023]
+            anos = [2024]
             contribuicao_folha = get_contribuicao_folha(driver, anos)
             
             planilha_path = 'template.xlsx'
             
             planilha = Planilha(planilha_path)
-            planilha.inserir_colunas_mes_aba_dados(1, 2023, 12, 2023)
+            planilha.inserir_colunas_mes_aba_dados(1, 2024, 12, 2024)
             planilha.insert_dados_aba_dados(contribuicao_folha['base_calculo'], False)
             planilha.inserir_valor_dado_na_apresentacao_pela_descricao('FOLHA (Total Período)', contribuicao_folha['base_calculo'][0]['descricao'])
             

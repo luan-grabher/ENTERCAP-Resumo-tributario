@@ -18,8 +18,9 @@ def main():
     is_sair_do_programa = False
     while not is_sair_do_programa:
         try:
-            opcoes_disponiveis_list = list(MENU.values())
-            opcao_escolhida = choicebox(msg, title, opcoes_disponiveis_list)
+            #opcoes_disponiveis_list = list(MENU.values())
+            #opcao_escolhida = choicebox(msg, title, opcoes_disponiveis_list)
+            opcao_escolhida = MENU['gerar_resumo_tributario']
             
             
             if opcao_escolhida == MENU['gerar_resumo_tributario']:
@@ -34,7 +35,8 @@ def main():
             else:
                 msgbox('Nenhuma opção selecionada')
                             
-            is_sair_do_programa = buttonbox('Deseja realizar outra operação?', 'Sair do programa', ['Sim', 'Não']) == 'Não'
+            #is_sair_do_programa = buttonbox('Deseja realizar outra operação?', 'Sair do programa', ['Sim', 'Não']) == 'Não'
+            is_sair_do_programa = True
             if is_sair_do_programa:
                 break
         except Exception as e:
