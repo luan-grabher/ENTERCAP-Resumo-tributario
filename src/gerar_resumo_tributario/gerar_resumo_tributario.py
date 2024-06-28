@@ -119,7 +119,7 @@ if __name__ == '__main__':
         # 46.540.315/0006-37
         cnpj = '46.540.315/0003-94'
         razao_social = 'BAZAR TOTAL'
-        anos = ['2024', '2023', '2022', '2021']
+        anos = ['2024', '2023', '2022', '2021', '2020', '2019']
 
         gerar_resumo_tributario(cnpj, anos, razao_social)
 
