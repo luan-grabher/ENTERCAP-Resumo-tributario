@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from src.sefaz.sefaz import get_driver_sefaz_logado, acessar_painel_usuario
-from src.seleniumHelper.seleniumHelper import waitAndClick, waitAndSendKeys, waitCss
+from src.seleniumHelper.seleniumHelper import waitAndClick, waitAndSendKeys, waitCss, waitDisappear
 from src.planilha.planilha import Planilha
 
 
@@ -16,25 +16,29 @@ TIPOS_OPERACAO = {
 
 
 def get_dict_list_from_driver_table_element(tableElement) -> list[dict[str, str]]:
-    headers = tableElement.find_elements(By.TAG_NAME, 'th')
-    headers_text = [header.text.replace("\n", ' ') for header in headers]
+    try:
+        headers = tableElement.find_elements(By.TAG_NAME, 'th')
+        headers_text = [header.text.replace("\n", ' ') for header in headers]
 
-    rows = tableElement.find_elements(By.TAG_NAME, 'tr')
+        rows = tableElement.find_elements(By.TAG_NAME, 'tr')
 
-    lista = []
+        lista = []
 
-    for row in rows:
-        colunas = row.find_elements(By.TAG_NAME, 'td')
-        row_dict = dict()
+        for row in rows:
+            colunas = row.find_elements(By.TAG_NAME, 'td')
+            row_dict = dict()
 
-        for index_coluna, elemento_coluna in enumerate(colunas):
-            if headers_text[index_coluna] in ('', ' '):
-                continue
+            for index_coluna, elemento_coluna in enumerate(colunas):
+                if headers_text[index_coluna] in ('', ' '):
+                    continue
 
-            row_dict[headers_text[index_coluna]
-                     ] = elemento_coluna.get_attribute('textContent')
+                row_dict[headers_text[index_coluna]
+                        ] = elemento_coluna.get_attribute('textContent')
 
-        lista.append(row_dict)
+            lista.append(row_dict)
+    except Exception as e:
+        raise Exception(
+            'SEFAZ - Erro ao tentar extrair dados da tabela de extrato de notas - ' + str(e))
 
     return lista
 
@@ -157,24 +161,31 @@ def get_sefaz_extrato_notas_from_cnpj(driver, url_painel_contribuinte: str, anos
             driver.find_element(
                 By.CSS_SELECTOR, selector_botam_consultar).click()
 
-            is_nenhum_resultado = False
+            try:
+                selector_carregando = 'div#areaExtNfeProcessando'
+                waitDisappear(driver, selector_carregando)
+            except:
+                raise Exception(
+                    'SEFAZ - Não foi possivel localizar o elemento de carregamento')
+
             try:
                 WebDriverWait(driver, 10).until(EC.alert_is_present())
                 alert = driver.switch_to.alert
                 alert.accept()
 
-                is_nenhum_resultado = True
+                print('SEFAZ - ALERT nenhum resultado encontrado no ano', ano)
+                continue
             except:
                 pass
 
-            if is_nenhum_resultado:
-                print('nenhum resultado encontrado no ano', ano)
+            try:
+                selector_tabela_resultados = '#aba_extrato_5 table.painel'
+                waitCss(driver, selector_tabela_resultados)
+                elemento_tabela = driver.find_element(
+                    By.CSS_SELECTOR, selector_tabela_resultados)
+            except:
+                print('SEFAZ - nenhum resultado encontrado no ano', ano)
                 continue
-
-            selector_tabela_resultados = '#aba_extrato_5 table.painel'
-            waitCss(driver, selector_tabela_resultados)
-            elemento_tabela = driver.find_element(
-                By.CSS_SELECTOR, selector_tabela_resultados)
 
             dados_tabela = get_dict_list_from_driver_table_element(
                 elemento_tabela)
@@ -182,8 +193,8 @@ def get_sefaz_extrato_notas_from_cnpj(driver, url_painel_contribuinte: str, anos
 
         return get_resultados_formato_planilha(resultados, tipo_operacao, cnpj=cnpj)
     except Exception as e:
-        raise e
-        # return False
+        raise Exception(
+            f'SEFAZ: Erro ao tentar pegar extrato de notas do cnpj {cnpj} - {e}')
 
 
 def get_resultados_formato_planilha(resultados: dict[str, list[dict[str, str]]], tipo_operacao, cnpj) -> dict[str, str | float]:
@@ -232,11 +243,12 @@ def test_webdriver():
         print('compras', compras)
 
         driver.close()
-        
+
         return faturamento, compras
-    
+
     return False, False
-        
+
+
 def test_create_planilha(faturamento: list[dict[str, dict[str, str | float]]], compras: list[dict[str, dict[str, str | float]]]):
     resultados_mesclados = faturamento + compras
 
@@ -245,18 +257,21 @@ def test_create_planilha(faturamento: list[dict[str, dict[str, str | float]]], c
     planilha = Planilha(planilha_path)
     planilha.inserir_colunas_mes_aba_dados(1, 2022, 12, 2023)
     planilha.insert_dados_aba_dados(resultados_mesclados, False)
-    planilha.inserir_soma_dados_na_apresentacao_por_regex(descricao_contains= 'FATURAMENTO - *', descricao_apresentacao='FATURAMENTO')
-    planilha.inserir_soma_dados_na_apresentacao_por_regex(descricao_contains= 'COMPRAS - *', descricao_apresentacao='COMPRAS')
+    planilha.inserir_soma_dados_na_apresentacao_por_regex(
+        descricao_contains='FATURAMENTO - *', descricao_apresentacao='FATURAMENTO')
+    planilha.inserir_soma_dados_na_apresentacao_por_regex(
+        descricao_contains='COMPRAS - *', descricao_apresentacao='COMPRAS')
     planilha.ajustar_width_colunas_aba('Dados')
 
     planilha.save('output.xlsx')
-        
+
+
 if __name__ == '__main__':
     tipo_teste = input(
         'Tipo de teste:\n1 - Teste webdriver\n2 - Teste planilha\n3 - Teste completo\n')
 
     if tipo_teste == '1':
-        test_webdriver()        
+        test_webdriver()
 
     elif tipo_teste == '2':
         resultados_sefaz = {
@@ -276,17 +291,21 @@ if __name__ == '__main__':
 
         cnpj1 = '12345678901234'
         cnpj2 = '12345678901235'
-        
-        faturamento_1 = get_resultados_formato_planilha(resultados_sefaz, tipo_operacao_faturamento, cnpj1)
-        faturamento_2 = get_resultados_formato_planilha(resultados_sefaz, tipo_operacao_faturamento, cnpj2)
-        compras_1 = get_resultados_formato_planilha(resultados_sefaz, tipo_operacao_compras, cnpj1)
-        compras_2 = get_resultados_formato_planilha(resultados_sefaz, tipo_operacao_compras, cnpj2)
-        
-        print('faturamento', [faturamento_1 , faturamento_2])
+
+        faturamento_1 = get_resultados_formato_planilha(
+            resultados_sefaz, tipo_operacao_faturamento, cnpj1)
+        faturamento_2 = get_resultados_formato_planilha(
+            resultados_sefaz, tipo_operacao_faturamento, cnpj2)
+        compras_1 = get_resultados_formato_planilha(
+            resultados_sefaz, tipo_operacao_compras, cnpj1)
+        compras_2 = get_resultados_formato_planilha(
+            resultados_sefaz, tipo_operacao_compras, cnpj2)
+
+        print('faturamento', [faturamento_1, faturamento_2])
         print('compras', [compras_1, compras_2])
-        
-        test_create_planilha([faturamento_1, faturamento_2], [compras_1, compras_2])
-        
+
+        test_create_planilha([faturamento_1, faturamento_2], [
+                             compras_1, compras_2])
 
     elif tipo_teste == '3':
         faturamento, compras = test_webdriver()
