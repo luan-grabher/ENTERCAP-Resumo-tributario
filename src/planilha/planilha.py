@@ -40,6 +40,17 @@ class Planilha:
         
         self.ajustar_width_colunas_aba('Dados')
                 
+        def inserir_periodo(mesInicio, anoInicio, mesFim, anoFim):
+            
+            
+            coluna_periodo = get_number_for_letter('C')
+            linha_periodo = 10
+            
+            periodo = f'Período: {mesesstr[mesInicio - 1]}/{anoInicio} a {mesesstr[mesFim - 1]}/{anoFim}'
+            
+            self.workbook['Apresentação'].cell(row=linha_periodo, column=coluna_periodo, value=periodo)            
+        
+        inserir_periodo(mesInicio, anoInicio, mesFim, anoFim)
     
     def ajustar_width_colunas_aba(self, nome_aba):
         aba = self.workbook[nome_aba]
@@ -247,7 +258,7 @@ if __name__ == '__main__':
     
     planilha.set_CNPJ('123456789')
     planilha.set_EMPRESA('Empresa ABC')
-    planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2021)
+    planilha.inserir_colunas_mes_aba_dados(1, 2019, 12, 2022)
     planilha.insert_dados_aba_dados([
         {
             'descricao': 'Receita',
