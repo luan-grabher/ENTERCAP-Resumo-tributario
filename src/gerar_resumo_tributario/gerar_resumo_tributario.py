@@ -45,14 +45,14 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
         descricao_contains='COMPRAS - *', descricao_apresentacao='COMPRAS')
     
+    planilha.inserir_soma_dados_na_apresentacao_por_regex(
+        descricao_contains='ICMS Mensal - *',
+        descricao_apresentacao='ICMS'
+    )
+    
     planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
         descricao_contains='ICMS - Fundo Combate a Pobresa - *',
         descricao_apresentacao='ICMS FCP',
-        descricao_x='MARGENS DE LUCRO E CUSTO'
-    )
-    planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
-        descricao_contains='ICMS Mensal - *',
-        descricao_apresentacao='ICMS ST',
         descricao_x='MARGENS DE LUCRO E CUSTO'
     )
         
@@ -200,7 +200,32 @@ if __name__ == '__main__':
             }]
         }
         
-        conta_corrente_fiscal = [{'descricao': 'ICMS DIF AL - 46.540.315/0003-94', '2023-11': 0.0, '2023-12': 0.0, '2024-01': 0.0, '2024-02': 0.0, '2024-03': 0.0}, {'descricao': 'ICMS Mensal - 46.540.315/0003-94', '2024-03': 10674.46}, {'descricao': 'ICMS - Fundo Combate a Pobresa - 46.540.315/0003-94'}, {'descricao': 'GIA Mensal - 46.540.315/0003-94'}, {'descricao': 'ICMS DIF AL - 46.540.315/0006-37', '2023-12': 0.0, '2024-01': 0.0, '2024-02': 0.0, '2024-03': 0.0}, {'descricao': 'ICMS Mensal - 46.540.315/0006-37'}, {'descricao': 'ICMS - Fundo Combate a Pobresa - 46.540.315/0006-37'}, {'descricao': 'GIA Mensal - 46.540.315/0006-37'}]
+        conta_corrente_fiscal = [
+            {
+                'descricao': 'ICMS DIF AL - 46.540.315/0003-94', '2023-11': 0.0, '2023-12': 0.0, '2024-01': 0.0, '2024-02': 0.0, '2024-03': 0.0
+            },
+            {
+                'descricao': 'ICMS Mensal - 46.540.315/0003-94', '2024-03': 10674.46, '2023-01': 1000.0, '2023-02': 2000.0, '2023-03': 3000.0, '2023-04': 4000.0,
+            },
+            {
+                'descricao': 'ICMS - Fundo Combate a Pobresa - 46.540.315/0003-94', '2023-01': 1000.0, '2023-02': 2000.0, '2023-03': 3000.0, '2023-04': 4000.0,
+            },
+            {
+                'descricao': 'GIA Mensal - 46.540.315/0003-94'
+            },
+            {
+                'descricao': 'ICMS DIF AL - 46.540.315/0006-37', '2023-12': 0.0, '2024-01': 0.0, '2024-02': 0.0, '2024-03': 0.0
+            },
+            {
+                'descricao': 'ICMS Mensal - 46.540.315/0006-37'
+            },
+            {
+                'descricao': 'ICMS - Fundo Combate a Pobresa - 46.540.315/0006-37'
+            },
+            {
+                'descricao': 'GIA Mensal - 46.540.315/0006-37'
+            }
+        ]
 
         ano_inicial = '2022'
         ano_final = '2024'
