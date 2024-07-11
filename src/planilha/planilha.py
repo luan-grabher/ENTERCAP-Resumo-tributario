@@ -172,26 +172,26 @@ class Planilha:
             'formula_quantidade_meses_com_valor': formula_quantidade_meses_com_valor
         }
     
-    def inserir_linha_aba_apresentacao(self, descricao: str):
-        linha_TRIBUTOS_SOBRE_VENDAS = self.get_linha_com_descricao_aba_apresentacao('% TRIBUTOS SOBRE VENDAS')
+    def inserir_linha_aba_apresentacao(self, descricao: str, descricao_linha_para_inserir_acima: str = '% TRIBUTOS SOBRE VENDAS') -> int:
+        linha_para_inserir_acima = self.get_linha_com_descricao_aba_apresentacao(descricao_linha_para_inserir_acima)
         
         #insere linha acima da linha de tributos sobre vendas
-        if linha_TRIBUTOS_SOBRE_VENDAS is None:
+        if linha_para_inserir_acima is None:
             return
         
         aba_apresentacao = self.workbook['Apresentação']
-        aba_apresentacao.insert_rows(linha_TRIBUTOS_SOBRE_VENDAS)
+        aba_apresentacao.insert_rows(linha_para_inserir_acima)
         
         #borda espessa esquerda na "B" e borda espessa direita ta "H"
         coluna_B = get_number_for_letter('B')
         coluna_H = get_number_for_letter('H')
         
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_B).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_H).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
+        aba_apresentacao.cell(row=linha_para_inserir_acima, column=coluna_B).border = openpyxl.styles.Border(left=openpyxl.styles.Side(style='medium'))
+        aba_apresentacao.cell(row=linha_para_inserir_acima, column=coluna_H).border = openpyxl.styles.Border(right=openpyxl.styles.Side(style='medium'))
         
-        aba_apresentacao.cell(row=linha_TRIBUTOS_SOBRE_VENDAS, column=coluna_B, value=descricao)
+        aba_apresentacao.cell(row=linha_para_inserir_acima, column=coluna_B, value=descricao)
         
-        linha_para_inserir = linha_TRIBUTOS_SOBRE_VENDAS
+        linha_para_inserir = linha_para_inserir_acima
         return linha_para_inserir
     
     def inserir_linha_dados_na_apresentacao(self, linha: int):
@@ -250,6 +250,23 @@ class Planilha:
         formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)
+    
+    def inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(self, descricao_contains: str, descricao_apresentacao: str, descricao_x: str):
+        # com base na descricao da aba dados, insere a soma dos valores na aba apresentacao acima de MARGENS DE LUCRO E CUSTO
+        # Semelhante a inserir_soma_dados_na_apresentacao_por_regex, mas insere acima de MARGENS DE LUCRO E CUSTO e com uma descrição definida ao invés de uma que já esteja na planilha
+        linha_para_inserir = self.inserir_linha_aba_apresentacao(descricao_apresentacao, descricao_linha_para_inserir_acima=descricao_x)
+        
+        if linha_para_inserir is None:
+            return
+        
+        aba_dados = self.workbook['Dados']
+        
+        coluna_total = aba_dados.max_column
+        
+        formula_total = f'=SUMIF(Dados!A:A, "{descricao_contains}", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
+        formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
+        
+        self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor, descricao_x=descricao_x)
                                       
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'

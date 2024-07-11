@@ -21,9 +21,9 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
     planilha.set_EMPRESA(razao_social)
 
     dados_para_inserir_com_aba_apresentacao = relacao_pgtos_para_planilha + \
-        das_para_planilha + contribuicao_folha['valor_contribuicao']
+        [das_para_planilha[2]] + contribuicao_folha['valor_contribuicao']
     dados_para_inserir_somente_aba_dados = faturamento + \
-        compras + contribuicao_folha['base_calculo'] + conta_corrente_fiscal
+        compras + contribuicao_folha['base_calculo'] + conta_corrente_fiscal + [das_para_planilha[0], das_para_planilha[1]]
 
     planilha.inserir_colunas_mes_aba_dados(
         1, int(ano_inicial), 12, int(ano_final))
@@ -35,13 +35,32 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
 
     planilha.inserir_valor_dado_na_apresentacao_pela_descricao(
         'FOLHA (Total Período)', contribuicao_folha['base_calculo'][0]['descricao'])
+    planilha.inserir_valor_dado_na_apresentacao_pela_descricao(
+        'Receita sem ST', das_para_planilha[0]['descricao'])
+    planilha.inserir_valor_dado_na_apresentacao_pela_descricao(
+        'Receita com ST', das_para_planilha[1]['descricao'])
 
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
         descricao_contains='FATURAMENTO - *', descricao_apresentacao='FATURAMENTO')
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
         descricao_contains='COMPRAS - *', descricao_apresentacao='COMPRAS')
     
-    planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_TRIBUTOS('GIA Mensal - *', 'ICMS - Saldo Credor')
+    planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
+        descricao_contains='ICMS - Fundo Combate a Pobresa - *',
+        descricao_apresentacao='ICMS FCP',
+        descricao_x='MARGENS DE LUCRO E CUSTO'
+    )
+    planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
+        descricao_contains='ICMS Mensal - *',
+        descricao_apresentacao='ICMS ST',
+        descricao_x='MARGENS DE LUCRO E CUSTO'
+    )
+        
+    planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
+        descricao_contains='GIA Mensal - *',
+        descricao_apresentacao='ICMS - Saldo Credor',
+        descricao_x='MARGENS DE LUCRO E CUSTO'
+    )
 
     planilha.ajustar_width_colunas_aba('Dados')
 
