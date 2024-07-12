@@ -288,7 +288,11 @@ if __name__ == '__main__':
             '2019-02': 100,
         }
     ])
-    planilha.inserir_linha_dados_na_apresentacao(2)
+    planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
+        descricao_contains='Receita',
+        descricao_apresentacao='RECEITA',
+        descricao_x='MARGENS DE LUCRO E CUSTO'
+    )
     planilha.ajustar_width_colunas_aba('Dados')
     
     planilha.save('output.xlsx')
