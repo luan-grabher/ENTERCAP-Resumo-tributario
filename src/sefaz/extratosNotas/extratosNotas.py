@@ -258,9 +258,9 @@ def test_create_planilha(faturamento: list[dict[str, dict[str, str | float]]], c
     planilha.inserir_colunas_mes_aba_dados(1, 2022, 12, 2023)
     planilha.insert_dados_aba_dados(resultados_mesclados, False)
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
-        descricao_contains='FATURAMENTO - *', descricao_apresentacao='FATURAMENTO')
+        descricao_contains='FATURAMENTO', descricao_apresentacao='FATURAMENTO')
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
-        descricao_contains='COMPRAS - *', descricao_apresentacao='COMPRAS')
+        descricao_contains='COMPRAS', descricao_apresentacao='COMPRAS')
     planilha.ajustar_width_colunas_aba('Dados')
 
     planilha.save('output.xlsx')

@@ -220,6 +220,18 @@ class Planilha:
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_apresentacao, formula_total, formula_quantidade_meses_com_valor)
         
+    def get_formula_quantidade_meses_com_valor_e_descricao(self, descricao: str):
+        aba_dados = self.workbook['Dados']
+        
+        coluna_total = aba_dados.max_column
+        coluna_maxima = openpyxl.utils.get_column_letter(coluna_total - 2)
+        
+        ultima_linha = aba_dados.max_row
+        
+        formula_quantidade_meses_com_valor = f'=SUMPRODUCT((ISNUMBER(SEARCH("{descricao}", Dados!A2:A{ultima_linha})))*(Dados!B2:{coluna_maxima}{ultima_linha} <> ""))'
+        
+        return formula_quantidade_meses_com_valor
+        
     def inserir_soma_dados_na_apresentacao_por_regex(self, descricao_contains: str, descricao_apresentacao: str):
         aba_dados = self.workbook['Dados']
         
@@ -229,8 +241,8 @@ class Planilha:
         
         coluna_total = aba_dados.max_column
         
-        formula_total = f'=SUMIF(Dados!A:A, "{descricao_contains}", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
-        formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
+        formula_total = f'=SUMIF(Dados!A:A, "*{descricao_contains}*", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
+        formula_quantidade_meses_com_valor = self.get_formula_quantidade_meses_com_valor_e_descricao(descricao_contains)
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_apresentacao, formula_total, formula_quantidade_meses_com_valor)
     
@@ -246,8 +258,8 @@ class Planilha:
         
         coluna_total = aba_dados.max_column
         
-        formula_total = f'=SUMIF(Dados!A:A, "{descricao_contains}", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
-        formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
+        formula_total = f'=SUMIF(Dados!A:A, "*{descricao_contains}*", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
+        formula_quantidade_meses_com_valor = self.get_formula_quantidade_meses_com_valor_e_descricao(descricao_contains)
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)
     
@@ -263,8 +275,8 @@ class Planilha:
         
         coluna_total = aba_dados.max_column
         
-        formula_total = f'=SUMIF(Dados!A:A, "{descricao_contains}", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
-        formula_quantidade_meses_com_valor = f'=COUNTIF(Dados!A:A, "{descricao_contains}")'
+        formula_total = f'=SUMIF(Dados!A:A, "*{descricao_contains}*", Dados!{openpyxl.utils.get_column_letter(coluna_total)}:{openpyxl.utils.get_column_letter(coluna_total)})'
+        formula_quantidade_meses_com_valor = self.get_formula_quantidade_meses_com_valor_e_descricao(descricao_contains)
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)
                                       

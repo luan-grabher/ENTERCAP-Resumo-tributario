@@ -41,29 +41,29 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
         'Receita com ST', das_para_planilha[1]['descricao'])
 
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
-        descricao_contains='FATURAMENTO - *', descricao_apresentacao='FATURAMENTO')
+        descricao_contains='FATURAMENTO', descricao_apresentacao='FATURAMENTO')
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
-        descricao_contains='COMPRAS - *', descricao_apresentacao='COMPRAS')
+        descricao_contains='COMPRAS', descricao_apresentacao='COMPRAS')
     
     
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
-        descricao_contains='ICMS Mensal - *',
+        descricao_contains='ICMS Mensal',
         descricao_apresentacao='ICMS Mensal'
     )    
     
     planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
-        descricao_contains='ICMS DIF AL - *',
+        descricao_contains='ICMS DIF AL',
         descricao_apresentacao='ICMS DIF AL',
         descricao_x='MARGENS DE LUCRO E CUSTO'
     )
     
     planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
-        descricao_contains='ICMS - Fundo Combate a Pobresa - *',
+        descricao_contains='ICMS - Fundo Combate a Pobresa',
         descricao_apresentacao='ICMS FCP',
         descricao_x='MARGENS DE LUCRO E CUSTO'
     )        
     planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_X(
-        descricao_contains='GIA Mensal - *',
+        descricao_contains='GIA Mensal',
         descricao_apresentacao='ICMS - Saldo Credor',
         descricao_x='MARGENS DE LUCRO E CUSTO'
     )
@@ -175,7 +175,7 @@ if __name__ == '__main__':
             {
                 'descricao': 'Receita com ST',
                 '2022-11': 100.0,
-                '2022-12': 200.0,
+                '2022-12': 400.0,
             },
             {
                 'descricao': 'Simples Nacional',

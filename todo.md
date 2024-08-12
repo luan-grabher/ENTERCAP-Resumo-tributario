@@ -1,9 +1,9 @@
-[ ] Titulo planilha: Planejamento Tributário
-[ ] Centralizar porcentagens
-[ ] Qtd Faturamento soma apenas linhas que tem faturamento e nao os meses. somar os meses que tem valor nas linhas de faturamento
-[ ] Receita sem ST esta sem o valor da aba dados
-[ ] Validar Receita com ST a soma de valores vinda do local correto
-[ ] Custo Fixo formula é faturamento * % que esta na coluna G (%)
+[x] Titulo planilha: Planejamento Tributário
+[x] Centralizar porcentagens
+[x] Qtd Faturamento soma apenas linhas que tem faturamento e nao os meses. somar os meses que tem valor nas linhas de faturamento
+[x] Receita sem ST esta sem o valor da aba dados
+[x] Validar Receita com ST a soma de valores vinda do local correto
+[ ] Custo Fixo formula é faturamento * % que esta na coluna G (%) *** REGIS DISSE QUE TEM QUE TER A % DUPLICADA MESMO PORQUE AS VEZES A % É DUPLICADA
 [ ] Coluna G (%) Custo Fixo fica 0% de fabrica, ou 1% caso tenha erro com as formulas
 [ ] Nova aba 'Tributos sobre vendas' com lista de nomes do que sera somado
 [ ] Titulo % Triobutos sobre vendas a % será a soma de % dos itens descritos na aba 'Tributos sobre vendas'
