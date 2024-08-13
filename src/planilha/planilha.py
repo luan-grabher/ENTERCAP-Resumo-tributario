@@ -321,12 +321,25 @@ class Planilha:
         aba_apresentacao.cell(row=linha_lucro_teorico, column=coluna_G, value=formula_lucro_teorico).number_format = '0.00%'
         aba_apresentacao.cell(row=linha_lucro_teorico, column=coluna_F, value=formula_faturamento_vezes_lucro_teorico).number_format = '#,##0.00'
         
+    def atualizar_total_carga_tributaria(self):
+        linha_tributos_sobre_vendas = self.get_linha_com_descricao_aba_apresentacao('% TRIBUTOS SOBRE VENDAS')
+        linha_margens_de_lucro_e_custo = self.get_linha_com_descricao_aba_apresentacao('MARGENS DE LUCRO E CUSTO')
+        linha_total_carga_tributaria = self.get_linha_com_descricao_aba_apresentacao('TOTAL CARGA TRIBUTÁRIA')
+        
+        formula_total_carga_tributaria = f'=SUM(G{linha_tributos_sobre_vendas}:G{linha_margens_de_lucro_e_custo - 1})'
+        
+        coluna_G = get_number_for_letter('G')
+        
+        aba_apresentacao = self.workbook['Apresentação']
+        aba_apresentacao.cell(row=linha_total_carga_tributaria, column=coluna_G, value=formula_total_carga_tributaria).number_format = '0.00%'
+        
         
     def save(self, output_path = 'output.xlsx'):
         self.ajustar_width_colunas_aba('Dados')
         self.atualizar_custo_fixo()
         self.atualizar_tributos_sobre_vendas()
         self.atualizar_lucro_teorico()
+        self.atualizar_total_carga_tributaria()
         
         self.workbook.save(output_path)   
                                    
