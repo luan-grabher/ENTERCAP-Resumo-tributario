@@ -261,7 +261,6 @@ def test_create_planilha(faturamento: list[dict[str, dict[str, str | float]]], c
         descricao_contains='FATURAMENTO', descricao_apresentacao='FATURAMENTO')
     planilha.inserir_soma_dados_na_apresentacao_por_regex(
         descricao_contains='COMPRAS', descricao_apresentacao='COMPRAS')
-    planilha.ajustar_width_colunas_aba('Dados')
 
     planilha.save('output.xlsx')
 

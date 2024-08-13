@@ -242,7 +242,6 @@ def test_create_planilha(resultados: list[dict[str, dict[str, str | float]]]):
     planilha.inserir_colunas_mes_aba_dados(1, 2022, 12, 2024)
     planilha.insert_dados_aba_dados(resultados, False)
     planilha.inserir_soma_dados_na_apresentacao_por_regex_acima_de_TRIBUTOS('GIA Mensal - *', 'ICMS - Saldo Credor')
-    planilha.ajustar_width_colunas_aba('Dados')
 
     planilha.save('output.xlsx')
 

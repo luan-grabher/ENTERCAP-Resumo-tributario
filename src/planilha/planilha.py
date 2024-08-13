@@ -17,9 +17,6 @@ class Planilha:
         
     def set_EMPRESA(self, empresa):
         self.workbook['Apresentação']['B7'] = 'EMPRESA: ' + empresa
-            
-    def save(self, output_path = 'output.xlsx'):
-        self.workbook.save(output_path)
     
     def inserir_colunas_mes_aba_dados(self, mesInicio: int, anoInicio: int, mesFim: int, anoFim: int):
         aba_dados = self.workbook['Dados']
@@ -140,7 +137,7 @@ class Planilha:
         
         return linha_descricao
     
-    def inserir_valor_na_linha_aba_apresentacao(self, linha: int, valor: str, quantidade: str):
+    def inserir_valor_na_linha_aba_apresentacao(self, linha: int, valor: str, quantidade: str | int, quantidade_formato: str = '0'):
         aba_apresentacao = self.workbook['Apresentação']
         
         celula_faturamento = "$F$14"
@@ -156,7 +153,7 @@ class Planilha:
         aba_apresentacao.cell(row=linha, column=coluna_G, value=formula_porcentagem_total_sobre_faturamento).number_format = '0.00%'
         aba_apresentacao.cell(row=linha, column=coluna_G).alignment = openpyxl.styles.Alignment(horizontal='center')
         
-        aba_apresentacao.cell(row=linha, column=coluna_H, value=quantidade).number_format = '0'
+        aba_apresentacao.cell(row=linha, column=coluna_H, value=quantidade).number_format = quantidade_formato
         aba_apresentacao.cell(row=linha, column=coluna_H).alignment = openpyxl.styles.Alignment(horizontal='center')
     
     def get_dado_by_linha(self, linha: int) -> dict:
@@ -279,7 +276,21 @@ class Planilha:
         formula_quantidade_meses_com_valor = self.get_formula_quantidade_meses_com_valor_e_descricao(descricao_contains)
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)
-                                      
+       
+    def atualizar_custo_fixo(self):
+        linha_faturamento = self.get_linha_com_descricao_aba_apresentacao('FATURAMENTO')
+        linha_custo_fixo = self.get_linha_com_descricao_aba_apresentacao('Custo Fixo - Teórico')
+        
+        formula_custo_fixo = f'=F{linha_faturamento} * H{linha_custo_fixo}'
+        
+        self.inserir_valor_na_linha_aba_apresentacao(linha_custo_fixo, formula_custo_fixo, 0, '0.00%')
+        
+    def save(self, output_path = 'output.xlsx'):
+        self.ajustar_width_colunas_aba('Dados')
+        self.atualizar_custo_fixo()
+        
+        self.workbook.save(output_path)   
+                                   
 if __name__ == '__main__':
     planilha_path = 'template.xlsx'
     

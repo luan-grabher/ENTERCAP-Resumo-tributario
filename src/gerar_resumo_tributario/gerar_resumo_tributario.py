@@ -13,7 +13,7 @@ from src.sefaz.faturamento.faturamento import get_faturamento_sefaz
 from src.sefaz.sefaz import get_driver_sefaz_logado
 
 
-def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha, das_para_planilha, contribuicao_folha, ano_inicial, ano_final, conta_corrente_fiscal):
+def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha, das_para_planilha, contribuicao_folha, ano_inicial, ano_final, conta_corrente_fiscal, is_test=False):
     template_path = 'template.xlsx'
 
     planilha = Planilha(template_path)
@@ -68,12 +68,15 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
         descricao_x='MARGENS DE LUCRO E CUSTO'
     )
 
-    planilha.ajustar_width_colunas_aba('Dados')
-
-    cnpj_numeros = re.sub(r'\D', '', cnpj)
-    desktop_path = os.path.expanduser('~') + '\\Desktop'
-    output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {
-        ano_inicial}_{ano_final}.xlsx'
+    if is_test:
+        output_path = 'output.xlsx'
+    else:
+        cnpj_numeros = re.sub(r'\D', '', cnpj)
+        desktop_path = os.path.expanduser('~') + '\\Desktop'
+        output_path = f'{desktop_path}\\{cnpj_numeros} resumo tributario {
+            ano_inicial}_{ano_final}.xlsx'
+        
+        
     planilha.save(output_path)
 
     return output_path
@@ -237,4 +240,4 @@ if __name__ == '__main__':
         ano_final = '2024'
 
         create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para_planilha,
-                        das_para_planilha, contribuicao_folha, ano_inicial, ano_final, conta_corrente_fiscal)
+                        das_para_planilha, contribuicao_folha, ano_inicial, ano_final, conta_corrente_fiscal, is_test=True)

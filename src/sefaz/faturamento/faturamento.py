@@ -40,6 +40,5 @@ if __name__ == '__main__':
             planilha.inserir_colunas_mes_aba_dados(1, 2021, 12, 2023)
             planilha.insert_dados_aba_dados(faturamento, False)
             planilha.inserir_valor_dado_na_apresentacao_pela_descricao(faturamento[0]['descricao'], faturamento[0]['descricao'])
-            
-            planilha.ajustar_width_colunas_aba('Dados')
+                        
             planilha.save('output.xlsx')
