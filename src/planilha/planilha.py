@@ -7,9 +7,14 @@ def get_number_for_letter(letter):
 mesesstr = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 mesesInt = {mes: i + 1 for i, mes in enumerate(mesesstr)}
 class Planilha:
+    
+    linha_faturamento = 14
+    
     def __init__(self, arquivo):
         self.arquivo = arquivo
         self.workbook = openpyxl.load_workbook(arquivo)
+        
+        self.linha_faturamento = self.get_linha_com_descricao_aba_apresentacao('FATURAMENTO')
 
         
     def set_CNPJ(self, cnpj):
@@ -140,7 +145,7 @@ class Planilha:
     def inserir_valor_na_linha_aba_apresentacao(self, linha: int, valor: str, quantidade: str | int, quantidade_formato: str = '0'):
         aba_apresentacao = self.workbook['Apresentação']
         
-        celula_faturamento = "$F$14"
+        celula_faturamento = "$F$" + str(self.linha_faturamento)
         formula_porcentagem_total_sobre_faturamento = f'=F{linha}/{celula_faturamento}'
                 
         coluna_F = get_number_for_letter('F')
@@ -278,16 +283,31 @@ class Planilha:
         self.inserir_valor_na_linha_aba_apresentacao(linha_para_inserir, formula_total, formula_quantidade_meses_com_valor)
        
     def atualizar_custo_fixo(self):
-        linha_faturamento = self.get_linha_com_descricao_aba_apresentacao('FATURAMENTO')
         linha_custo_fixo = self.get_linha_com_descricao_aba_apresentacao('Custo Fixo - Teórico')
         
-        formula_custo_fixo = f'=F{linha_faturamento} * H{linha_custo_fixo}'
+        formula_custo_fixo = f'=F{self.linha_faturamento} * H{linha_custo_fixo}'
         
         self.inserir_valor_na_linha_aba_apresentacao(linha_custo_fixo, formula_custo_fixo, 0, '0.00%')
+    
+    def atualizar_tributos_sobre_vendas(self):
+        linha_tributos_sobre_vendas = self.get_linha_com_descricao_aba_apresentacao('% TRIBUTOS SOBRE VENDAS')
+        
+        linha_inicial_tributos_aba_apresentacao = self.linha_faturamento - 1
+        linha_final_tributos_aba_apresentacao = linha_tributos_sobre_vendas - 1
+        
+        coluna_G = get_number_for_letter('G')
+        formula_tributos_sobre_vendas = f'=SUMPRODUCT(SUMIF( B{linha_inicial_tributos_aba_apresentacao}:B{linha_final_tributos_aba_apresentacao}, \'Tributos sobre vendas\'!A1:A40, G{linha_inicial_tributos_aba_apresentacao}:G{linha_final_tributos_aba_apresentacao}))'
+        print(formula_tributos_sobre_vendas)
+        
+        aba_apresentacao = self.workbook['Apresentação']
+        
+        aba_apresentacao.cell(row=linha_tributos_sobre_vendas, column=coluna_G, value=formula_tributos_sobre_vendas).number_format = '0.00%'
+        
         
     def save(self, output_path = 'output.xlsx'):
         self.ajustar_width_colunas_aba('Dados')
         self.atualizar_custo_fixo()
+        self.atualizar_tributos_sobre_vendas()
         
         self.workbook.save(output_path)   
                                    
