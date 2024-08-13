@@ -297,17 +297,36 @@ class Planilha:
         
         coluna_G = get_number_for_letter('G')
         formula_tributos_sobre_vendas = f'=SUMPRODUCT(SUMIF( B{linha_inicial_tributos_aba_apresentacao}:B{linha_final_tributos_aba_apresentacao}, \'Tributos sobre vendas\'!A1:A40, G{linha_inicial_tributos_aba_apresentacao}:G{linha_final_tributos_aba_apresentacao}))'
-        print(formula_tributos_sobre_vendas)
         
         aba_apresentacao = self.workbook['Apresentação']
         
         aba_apresentacao.cell(row=linha_tributos_sobre_vendas, column=coluna_G, value=formula_tributos_sobre_vendas).number_format = '0.00%'
+        
+    def atualizar_lucro_teorico(self):
+        linha_compras = self.get_linha_com_descricao_aba_apresentacao('COMPRAS')
+        linha_tributos_sobre_vendas = self.get_linha_com_descricao_aba_apresentacao('% TRIBUTOS SOBRE VENDAS')
+        linha_custo_fixo = self.get_linha_com_descricao_aba_apresentacao('Custo Fixo - Teórico')
+        linha_lucro_teorico = self.get_linha_com_descricao_aba_apresentacao('Lucro - Teórico')
+        if linha_lucro_teorico is None:
+            print('Não foi possível inserir linha de Lucro - Teórico')
+            return              
+         
+        formula_lucro_teorico = f'=1 - SUM(G{linha_compras}:G{linha_tributos_sobre_vendas}, G{linha_custo_fixo})'
+        formula_faturamento_vezes_lucro_teorico = f'=F{self.linha_faturamento} * G{linha_lucro_teorico}'
+                
+        coluna_G = get_number_for_letter('G')
+        coluna_F = get_number_for_letter('F')
+        
+        aba_apresentacao = self.workbook['Apresentação']
+        aba_apresentacao.cell(row=linha_lucro_teorico, column=coluna_G, value=formula_lucro_teorico).number_format = '0.00%'
+        aba_apresentacao.cell(row=linha_lucro_teorico, column=coluna_F, value=formula_faturamento_vezes_lucro_teorico).number_format = '#,##0.00'
         
         
     def save(self, output_path = 'output.xlsx'):
         self.ajustar_width_colunas_aba('Dados')
         self.atualizar_custo_fixo()
         self.atualizar_tributos_sobre_vendas()
+        self.atualizar_lucro_teorico()
         
         self.workbook.save(output_path)   
                                    
