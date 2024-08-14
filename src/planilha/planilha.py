@@ -10,6 +10,10 @@ class Planilha:
     
     linha_faturamento = 14
     
+    coluna_F = get_number_for_letter('F')
+    coluna_G = get_number_for_letter('G')
+    coluna_H = get_number_for_letter('H')
+    
     def __init__(self, arquivo):
         self.arquivo = arquivo
         self.workbook = openpyxl.load_workbook(arquivo)
@@ -357,17 +361,40 @@ class Planilha:
             
             formula_irpj = f'=IF(F{linha_lucro_teorico} > 0, F{linha_lucro_teorico} * H{linha_irpj}, 0)'
             
-            coluna_F = get_number_for_letter('F')
-            coluna_G = get_number_for_letter('G')
-            coluna_H = get_number_for_letter('H')
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=linha_irpj, column=self.coluna_F, value=formula_irpj).number_format = '#,##0.00'
+            aba_apresentacao.cell(row=linha_irpj, column=self.coluna_G, value=f'=F{linha_irpj}/F{self.linha_faturamento}').number_format = '0.00%'
+            
+        def atualizar_csll():
+            #[ ] CSLL - se lucro teorico > 0  -> lucro * % da linha
+            linha_csll = self.get_linha_com_descricao_aba_apresentacao('CSLL (não identificamos baixa, quebras, roubo)')
+            linha_lucro_teorico = self.get_linha_com_descricao_aba_apresentacao('Lucro - Teórico')
+            
+            formula_csll = f'=IF(F{linha_lucro_teorico} > 0, F{linha_lucro_teorico} * H{linha_csll}, 0)'
             
             aba_apresentacao = self.workbook['Apresentação']
-            aba_apresentacao.cell(row=linha_irpj, column=coluna_F, value=formula_irpj).number_format = '#,##0.00'
-            aba_apresentacao.cell(row=linha_irpj, column=coluna_G, value=f'=F{linha_irpj}/F{self.linha_faturamento}').number_format = '0.00%'
+            aba_apresentacao.cell(row=linha_csll, column=self.coluna_F, value=formula_csll).number_format = '#,##0.00'
+            aba_apresentacao.cell(row=linha_csll, column=self.coluna_G, value=f'=F{linha_csll}/F{self.linha_faturamento}').number_format = '0.00%'
             
+        def atualizar_icms():
+            # [ ] ICMS : FATURAMENTO * icms venda - COMPRAS * icms compras
+            linha_icms = self.get_linha_com_descricao_aba_apresentacao('ICMS')
+            linha_icms_compras = self.get_linha_com_descricao_aba_apresentacao('% ICMS Compra')
+            linha_icms_vendas = self.get_linha_com_descricao_aba_apresentacao('% ICMS Venda')
+            linha_compras = self.get_linha_com_descricao_aba_apresentacao('COMPRAS')
+            
+            formula = f'=(F{self.linha_faturamento} * C{linha_icms_vendas}) - (F{linha_compras} * C{linha_icms_compras})'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=linha_icms, column=self.coluna_F, value=formula).number_format = '#,##0.00'
+            aba_apresentacao.cell(row=linha_icms, column=self.coluna_G, value=f'=F{linha_icms}/F{self.linha_faturamento}').number_format = '0.00%'
+            
+             
         
         atualizar_inss()
         atualizar_irpj()
+        atualizar_csll()
+        atualizar_icms()
         
         
     def save(self, output_path = 'output.xlsx'):
