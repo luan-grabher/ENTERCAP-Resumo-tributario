@@ -333,6 +333,42 @@ class Planilha:
         aba_apresentacao = self.workbook['Apresentação']
         aba_apresentacao.cell(row=linha_total_carga_tributaria, column=coluna_G, value=formula_total_carga_tributaria).number_format = '0.00%'
         
+    def atualizar_tributos_sobre_faturamento(self):
+        def atualizar_inss():
+            linha_inss_1410 = self.get_linha_com_descricao_aba_apresentacao('1410 - INSS')
+            linha_inss_tributos_sobre_faturamento = self.get_linha_com_descricao_aba_apresentacao('INSS')
+            
+            valor_inss_1410 = f'=F{linha_inss_1410}' if linha_inss_tributos_sobre_faturamento is not None else '0'
+            quantidade_inss_1410 = f'=H{linha_inss_1410}' if linha_inss_1410 is not None else '0'
+            
+            coluna_F = get_number_for_letter('F')
+            coluna_G = get_number_for_letter('G')
+            coluna_H = get_number_for_letter('H')
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=linha_inss_tributos_sobre_faturamento, column=coluna_F, value=valor_inss_1410).number_format = '#,##0.00'
+            aba_apresentacao.cell(row=linha_inss_tributos_sobre_faturamento, column=coluna_G, value=f'=F{linha_inss_tributos_sobre_faturamento}/F{self.linha_faturamento}').number_format = '0.00%'
+            aba_apresentacao.cell(row=linha_inss_tributos_sobre_faturamento, column=coluna_H, value=quantidade_inss_1410).number_format = '0.00%'
+            
+        def atualizar_irpj():
+            #[ ] IRPJ - se lucro teorico > 0  -> lucro * % da linha
+            linha_irpj = self.get_linha_com_descricao_aba_apresentacao('IRPJ (não identificamos baixa, quebras, roubo)')
+            linha_lucro_teorico = self.get_linha_com_descricao_aba_apresentacao('Lucro - Teórico')
+            
+            formula_irpj = f'=IF(F{linha_lucro_teorico} > 0, F{linha_lucro_teorico} * H{linha_irpj}, 0)'
+            
+            coluna_F = get_number_for_letter('F')
+            coluna_G = get_number_for_letter('G')
+            coluna_H = get_number_for_letter('H')
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=linha_irpj, column=coluna_F, value=formula_irpj).number_format = '#,##0.00'
+            aba_apresentacao.cell(row=linha_irpj, column=coluna_G, value=f'=F{linha_irpj}/F{self.linha_faturamento}').number_format = '0.00%'
+            
+        
+        atualizar_inss()
+        atualizar_irpj()
+        
         
     def save(self, output_path = 'output.xlsx'):
         self.ajustar_width_colunas_aba('Dados')
@@ -340,6 +376,7 @@ class Planilha:
         self.atualizar_tributos_sobre_vendas()
         self.atualizar_lucro_teorico()
         self.atualizar_total_carga_tributaria()
+        self.atualizar_tributos_sobre_faturamento()
         
         self.workbook.save(output_path)   
                                    
