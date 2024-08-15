@@ -389,12 +389,22 @@ class Planilha:
             aba_apresentacao.cell(row=linha_icms, column=self.coluna_F, value=formula).number_format = '#,##0.00'
             aba_apresentacao.cell(row=linha_icms, column=self.coluna_G, value=f'=F{linha_icms}/F{self.linha_faturamento}').number_format = '0.00%'
             
-             
+        def atualizar_total():
+            linha_total_carga_tributaria = self.get_linha_com_descricao_aba_apresentacao('TOTAL CARGA TRIBUTÁRIA')
+            linha_porcentagem_tributos_sobre_faturamento = self.get_linha_com_descricao_aba_apresentacao('% TRIBUTOS SOBRE O FATURAMENTO')
+            
+            formula_total = f'=SUM(F{linha_total_carga_tributaria + 2 }:F{linha_porcentagem_tributos_sobre_faturamento - 1})'
+            formula_porcentagem = f'=F{linha_porcentagem_tributos_sobre_faturamento}/F{self.linha_faturamento}'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=linha_porcentagem_tributos_sobre_faturamento, column=self.coluna_F, value=formula_total).number_format = '#,##0.00'
+            aba_apresentacao.cell(row=linha_porcentagem_tributos_sobre_faturamento, column=self.coluna_G, value=formula_porcentagem).number_format = '0.00%'
         
         atualizar_inss()
         atualizar_irpj()
         atualizar_csll()
         atualizar_icms()
+        atualizar_total()
         
         
     def save(self, output_path = 'output.xlsx'):
