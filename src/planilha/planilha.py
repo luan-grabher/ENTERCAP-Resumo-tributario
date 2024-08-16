@@ -316,7 +316,7 @@ class Planilha:
             print('Não foi possível inserir linha de Lucro - Teórico')
             return              
          
-        formula_lucro_teorico = f'=1 - SUM(G{linha_compras}:G{linha_tributos_sobre_vendas}, G{linha_custo_fixo})'
+        formula_lucro_teorico = f'=1 - SUM(G{linha_compras}:G{linha_tributos_sobre_vendas - 1 }, G{linha_custo_fixo})'
         formula_faturamento_vezes_lucro_teorico = f'=F{self.linha_faturamento} * G{linha_lucro_teorico}'
                 
         coluna_G = get_number_for_letter('G')

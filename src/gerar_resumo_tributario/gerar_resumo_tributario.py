@@ -154,6 +154,7 @@ if __name__ == '__main__':
     elif tipo_teste == '2':
         cnpj = '46.540.315/0003-94'
         razao_social = 'BAZAR TOTAL'
+        
         faturamento = [
             {
                 'descricao': 'FATURAMENTO - 12345678901234', '2023-11': 93352.92, '2023-12': 93352.92
