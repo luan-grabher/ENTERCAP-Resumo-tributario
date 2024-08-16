@@ -83,19 +83,22 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
 
 
 def gerar_resumo_tributario(cnpj, anos, razao_social):
-    driver = get_driver_ecac_logado()
+    import undetected_chromedriver as uc
+    driver = uc.Chrome()
+    
+    driver = get_driver_ecac_logado(driver)
     if not driver:
         msgbox('Erro ao tentar fazer login no ECAC')
         return False
+    
+    driver = get_driver_sefaz_logado(driver)
+    if not driver:
+        msgbox('Erro ao tentar fazer login no Sefaz')
+        return False    
 
     driver = get_driver_esocial_logado(driver)
     if not driver:
         msgbox('Erro ao tentar fazer login no eSocial')
-        return False
-
-    driver = get_driver_sefaz_logado(driver)
-    if not driver:
-        msgbox('Erro ao tentar fazer login no Sefaz')
         return False
 
     try:
