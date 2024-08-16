@@ -13,6 +13,7 @@ class Planilha:
     coluna_F = get_number_for_letter('F')
     coluna_G = get_number_for_letter('G')
     coluna_H = get_number_for_letter('H')
+    coluna_P = get_number_for_letter('P')
     
     def __init__(self, arquivo):
         self.arquivo = arquivo
@@ -343,7 +344,6 @@ class Planilha:
             linha_inss_tributos_sobre_faturamento = self.get_linha_com_descricao_aba_apresentacao('INSS')
             
             valor_inss_1410 = f'=F{linha_inss_1410}' if linha_inss_tributos_sobre_faturamento is not None else '0'
-            quantidade_inss_1410 = f'=H{linha_inss_1410}' if linha_inss_1410 is not None else '0'
             
             coluna_F = get_number_for_letter('F')
             coluna_G = get_number_for_letter('G')
@@ -352,32 +352,29 @@ class Planilha:
             aba_apresentacao = self.workbook['Apresentação']
             aba_apresentacao.cell(row=linha_inss_tributos_sobre_faturamento, column=coluna_F, value=valor_inss_1410).number_format = '#,##0.00'
             aba_apresentacao.cell(row=linha_inss_tributos_sobre_faturamento, column=coluna_G, value=f'=F{linha_inss_tributos_sobre_faturamento}/F{self.linha_faturamento}').number_format = '0.00%'
-            aba_apresentacao.cell(row=linha_inss_tributos_sobre_faturamento, column=coluna_H, value=quantidade_inss_1410).number_format = '0.00%'
+            aba_apresentacao.cell(row=linha_inss_tributos_sobre_faturamento, column=coluna_H, value=f'=G{linha_inss_tributos_sobre_faturamento}').number_format = '0.00%'
             
         def atualizar_irpj():
-            #[ ] IRPJ - se lucro teorico > 0  -> lucro * % da linha
             linha_irpj = self.get_linha_com_descricao_aba_apresentacao('IRPJ (não identificamos baixa, quebras, roubo)')
             linha_lucro_teorico = self.get_linha_com_descricao_aba_apresentacao('Lucro - Teórico')
             
-            formula_irpj = f'=IF(F{linha_lucro_teorico} > 0, F{linha_lucro_teorico} * H{linha_irpj}, 0)'
+            formula_irpj = f'=F{linha_lucro_teorico} * H{linha_irpj}'
             
             aba_apresentacao = self.workbook['Apresentação']
             aba_apresentacao.cell(row=linha_irpj, column=self.coluna_F, value=formula_irpj).number_format = '#,##0.00'
             aba_apresentacao.cell(row=linha_irpj, column=self.coluna_G, value=f'=F{linha_irpj}/F{self.linha_faturamento}').number_format = '0.00%'
             
         def atualizar_csll():
-            #[ ] CSLL - se lucro teorico > 0  -> lucro * % da linha
             linha_csll = self.get_linha_com_descricao_aba_apresentacao('CSLL (não identificamos baixa, quebras, roubo)')
             linha_lucro_teorico = self.get_linha_com_descricao_aba_apresentacao('Lucro - Teórico')
             
-            formula_csll = f'=IF(F{linha_lucro_teorico} > 0, F{linha_lucro_teorico} * H{linha_csll}, 0)'
+            formula_csll = f'=F{linha_lucro_teorico} * H{linha_csll}'
             
             aba_apresentacao = self.workbook['Apresentação']
             aba_apresentacao.cell(row=linha_csll, column=self.coluna_F, value=formula_csll).number_format = '#,##0.00'
             aba_apresentacao.cell(row=linha_csll, column=self.coluna_G, value=f'=F{linha_csll}/F{self.linha_faturamento}').number_format = '0.00%'
             
         def atualizar_icms():
-            # [ ] ICMS : FATURAMENTO * icms venda - COMPRAS * icms compras
             linha_icms = self.get_linha_com_descricao_aba_apresentacao('ICMS')
             linha_icms_compras = self.get_linha_com_descricao_aba_apresentacao('% ICMS Compra')
             linha_icms_vendas = self.get_linha_com_descricao_aba_apresentacao('% ICMS Venda')
@@ -399,12 +396,68 @@ class Planilha:
             aba_apresentacao = self.workbook['Apresentação']
             aba_apresentacao.cell(row=linha_porcentagem_tributos_sobre_faturamento, column=self.coluna_F, value=formula_total).number_format = '#,##0.00'
             aba_apresentacao.cell(row=linha_porcentagem_tributos_sobre_faturamento, column=self.coluna_G, value=formula_porcentagem).number_format = '0.00%'
+            
+        def atualizar_icms_compra():
+            linha_icms_compras = self.get_linha_com_descricao_aba_apresentacao('% ICMS Compra')
+            
+            formula_icms_compras = f'=C{linha_icms_compras}'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=1, column=self.coluna_P, value=formula_icms_compras).number_format = '0.00%'
+        
+        def atualizar_icms_venda():
+            linha_icms_vendas = self.get_linha_com_descricao_aba_apresentacao('% ICMS Venda')
+            
+            formula_icms_vendas = f'=C{linha_icms_vendas}'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=2, column=self.coluna_P, value=formula_icms_vendas).number_format = '0.00%'
+        
+        def atualizar_pis():
+            linha_pis = self.get_linha_com_descricao_aba_apresentacao('PIS (aproveitar despesas, excl ICMS, baixa, quebras, roubo)')
+            
+            formula_pis = f'=H{linha_pis}'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=3, column=self.coluna_P, value=formula_pis).number_format = '0.00%'
+            aba_apresentacao.cell(row=linha_pis, column=self.coluna_G, value=f'=F{linha_pis}/F{self.linha_faturamento}').number_format = '0.00%'
+            
+        def atualizar_cofins():
+            linha_cofins = self.get_linha_com_descricao_aba_apresentacao('COFINS (aproveitar despesas, excl ICMS, baixa, quebras, roubo)')
+            
+            formula_cofins = f'=H{linha_cofins}'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=4, column=self.coluna_P, value=formula_cofins).number_format = '0.00%'
+            aba_apresentacao.cell(row=linha_cofins, column=self.coluna_G, value=f'=F{linha_cofins}/F{self.linha_faturamento}').number_format = '0.00%'
+            
+        def atualizar_compras():
+            linha_compras = self.get_linha_com_descricao_aba_apresentacao('COMPRAS')
+            
+            formula_compras = f'=F{linha_compras}'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=5, column=self.coluna_P, value=formula_compras).number_format = '#,##0.00'
+            
+        def atualizar_despesas():
+            linha_custo_fixo = self.get_linha_com_descricao_aba_apresentacao('Custo Fixo - Teórico')
+            
+            formula_despesas = f'=F{linha_custo_fixo}'
+            
+            aba_apresentacao = self.workbook['Apresentação']
+            aba_apresentacao.cell(row=6, column=self.coluna_P, value=formula_despesas).number_format = '#,##0.00'
         
         atualizar_inss()
         atualizar_irpj()
         atualizar_csll()
         atualizar_icms()
         atualizar_total()
+        atualizar_icms_compra()
+        atualizar_icms_venda()
+        atualizar_pis()
+        atualizar_cofins()
+        atualizar_compras()
+        atualizar_despesas()
         
         
     def save(self, output_path = 'output.xlsx'):
