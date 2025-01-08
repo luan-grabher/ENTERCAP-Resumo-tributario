@@ -5,6 +5,7 @@ import base64
 from src.config import getConfig, setConfig
 
 api_url_servicos_consultar = "https://gateway.apiserpro.serpro.gov.br/integra-contador/v1/Consultar"
+numero_contratante = "13676599000120"
 
 def apiRequest(curl_command):
     try:
@@ -46,11 +47,22 @@ def apiLogin(certificado_path, certificado_senha):
     resultado = apiRequest(curl_command)
     if resultado.returncode != 0:
         print("Erro ao autenticar na API do Serpro:", resultado.stderr)
+        config['api_serpro']['bearer_token'] = ""
+        config['api_serpro']['ultimo_ceritifcado'] = {
+            "path": "",
+            "senha": ""
+        }
+        setConfig(config)
         return False
     
     if resultado.status_code != "200":
         print("Erro ao autenticar na API do Serpro:", resultado.json)
-        
+        config['api_serpro']['bearer_token'] = ""
+        config['api_serpro']['ultimo_ceritifcado'] = {
+            "path": "",
+            "senha": ""
+        }
+        setConfig(config)
         return False
     
     bearer_token = resultado.json['access_token']
@@ -74,7 +86,7 @@ def get_pgdasd(ano, mes):
     
     body = {
       "contratante": {
-        "numero": "13.676.599/0001-20",
+        "numero": f"{numero_contratante}",
         "tipo": 2
       },
       "autorPedidoDados": {
@@ -150,6 +162,9 @@ def get_pgdasd(ano, mes):
 if __name__ == "__main__":
     certificado_path = "downloads/Arquivos teste Entercap/Certificado/MARKETSWY.pfx"
     certificado_senha = "Mrf222122"
+    
+    bearer_token = apiLogin(certificado_path, certificado_senha)
+    print(bearer_token)
     
     resultado = get_pgdasd(2024, 11)
     print(resultado)
