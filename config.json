@@ -1,0 +1,11 @@
+{
+    "api_serpro": {
+        "consumer_key": "HDI146z0Vzcxt_bDrkH8inx3T9ca",
+        "consumer_secret": "lnxfTxhY_YWWEi5yefy_s4y4oGwa",
+        "bearer_token": "eyJ4NXQiOiJNalJqWkRRMU1EQmtPR1JqWW1Jek9EVmxaRFEzWkdFeU1EVTVabU5rWldVeU9XUmhPRFZpTnciLCJraWQiOiJNRGN5WVdFNU16ZzVaVFJrT1dVME1XWTBNVE0xTkdJMllqbG1OVFZrT0dJd01UVmlORGRpWldJM1pEUmpZVEpsTTJaa05Ua3dNR1F3TWpZeVlXTmxNQV9SUzI1NiIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJhdXRlbnRpa3VzIiwiYXV0IjoiQVBQTElDQVRJT04iLCJhdWQiOiJIREkxNDZ6MFZ6Y3h0X2JEcmtIOGlueDNUOWNhIiwibmJmIjoxNzM2MzQ1NTA4LCJhenAiOiJIREkxNDZ6MFZ6Y3h0X2JEcmtIOGlueDNUOWNhIiwic2NvcGUiOiJkZWZhdWx0IiwiaXNzIjoiaHR0cHM6XC9cL3B1Ymxpc2hlci5hcGlzZXJwcm8uc2VycHJvLmdvdi5icjo0NDNcL29hdXRoMlwvdG9rZW4iLCJyZWFsbSI6eyJzaWduaW5nX3RlbmFudCI6ImNhcmJvbi5zdXBlciJ9LCJleHAiOjE3MzYzNDkxMDgsImlhdCI6MTczNjM0NTUwOCwianRpIjoiNGNkZGI3MmEtMjc4NC00MWU4LWE5NjUtNGVlMWE1NjUzZTE0In0.NqfgsHn_2HLL9sJNPLaFNyPYXSDyjvkdOPoi_f-rzvKD-7kH9AHUIhv_8qCDbteLnpCo84yT9SqbNZE3t9D0DimRvQzmPByH_YHZFd_fY_MpSxthoVeMQBEqL4L0GstuOxVcmz3h3c5hpqocx6qu26MWz-SVIQFdhkR-wp8NyVH-YVNpTgac7iaE5u3ZGt79O-fDNohUY3OF_N_VnFsxE934kXtV1kfFhDFRa0bA_0dXv-UzUwVf7gf0OtOV_M4DUOcK9GbmxuqmN09G6XoQQyryRzhxdMNuqBLKrScUMaikDGiWstxDxRw8KLS3H4dIfF7mgEwuUjeHbgViox10AA",
+        "ultimo_ceritifcado": {
+            "path": "downloads/Arquivos teste Entercap/Certificado/MARKETSWY.pfx",
+            "senha": "Mrf222122"
+        }
+    }
+}

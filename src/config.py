@@ -2,7 +2,15 @@ import json
 import os
 
 default_config = {
-    "variavel": "valor",
+    "api_serpro" : {
+        "consumer_key" : "",
+        "consumer_secret" : "",
+        "bearer_token": "",
+        "ultimo_ceritifcado" : {
+            "path": "",
+            "senha": ""
+        }
+    }
 }
 
 config_path = "config.json"
@@ -36,6 +44,16 @@ def setConfig(config):
         json.dump(config, json_file, ensure_ascii=False, indent=4)
         
     return config
+
+def resetConfigExecucao():
+    config = getConfig()
+    config['api_serpro']['bearer_token'] = ""
+    config['api_serpro']['ultimo_ceritifcado'] = {
+        "path": "",
+        "senha": ""
+    }
+    
+    setConfig(config)
     
 if __name__ == "__main__":
     config = getConfig()

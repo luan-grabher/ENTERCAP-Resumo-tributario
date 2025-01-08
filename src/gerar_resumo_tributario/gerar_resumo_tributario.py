@@ -84,7 +84,12 @@ def create_planilha(cnpj, razao_social, faturamento, compras, relacao_pgtos_para
 
 def gerar_resumo_tributario(cnpj, anos, razao_social):
     import undetected_chromedriver as uc
-    driver = uc.Chrome()
+    try:
+        driver = uc.Chrome()
+    except Exception as e:
+        msgbox('Erro ao iniciar o Chrome, você precisa possuir a última versão do Chrome instalada')
+        
+        return False
     
     driver = get_driver_ecac_logado(driver)
     if not driver:
